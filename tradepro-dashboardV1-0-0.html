@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+    <!-- Styles and script for a custom password gateway -->
+    <style>
+      /* Full‑screen overlay to protect the page until the correct password is entered */
+      #password-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+      #password-overlay .popup {
+        background: var(--card);
+        border: 1px solid var(--line);
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 300px;
+        width: 90%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        text-align: center;
+      }
+      #password-overlay h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+        color: var(--muted);
+      }
+      #password-overlay input {
+        width: 100%;
+        padding: 8px 10px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: var(--bg);
+        color: #E5E7EB;
+        font-size: 14px;
+      }
+      #password-overlay button {
+        width: 100%;
+        padding: 8px;
+        border: none;
+        border-radius: 6px;
+        background: var(--accent);
+        color: #0F172A;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      #password-overlay .error {
+        color: #EF4444;
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+      }
+    </style>
+    <script>
+      // Wait until DOM is ready to wire up the password form
+      document.addEventListener('DOMContentLoaded', function() {
+        var overlay = document.getElementById('password-overlay');
+        var input = document.getElementById('password-input');
+        var button = document.getElementById('password-submit');
+        var errorMsg = document.getElementById('password-error');
+        var correctPassword = 'buddy';
+        function checkPassword() {
+          if (input.value === correctPassword) {
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+          } else {
+            errorMsg.style.display = 'block';
+            input.value = '';
+          }
+        }
+        button.addEventListener('click', function(event) {
+          event.preventDefault();
+          checkPassword();
+        });
+        input.addEventListener('keypress', function(event) {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            checkPassword();
+          }
+        });
+        // Prevent scrolling while overlay is visible
+        document.body.style.overflow = 'hidden';
+      });
+    </script>
+<title>TradeProBuddy™ – Project Dashboard</title>
+<style>
+  :root{
+    --brand:#7B3FA0;
+    --accent:#10B981;
+    --ink:#111827;
+    --bg:#0b1020;
+    --card:#020617;
+    --muted:#9CA3AF;
+    --line:#1F2933;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    padding:32px 16px 40px;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at top,#111827 0,#020617 55%,#000 100%);
+    color:#E5E7EB;
+  }
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    background:rgba(15,23,42,0.96);
+    border-radius:20px;
+    padding:24px 24px 28px;
+    border:1px solid #111827;
+    box-shadow:0 18px 50px rgba(15,23,42,0.9);
+  }
+  h1{
+    margin:0 0 8px;
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:0.02em;
+  }
+  .subtitle{
+    margin:0 0 16px;
+    font-size:14px;
+    color:var(--muted);
+  }
+  .pill-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-bottom:18px;
+    font-size:12px;
+  }
+  .pill{
+    padding:4px 10px;
+    border-radius:999px;
+    border:1px solid #1F2937;
+    background:#020617;
+    color:#E5E7EB;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .pill strong{font-weight:600;}
+  .pill-dot{
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:var(--accent);
+  }
+  .pill-phase{border-color:var(--brand);}
+
+  /* Nav */
+  .nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:0 0 20px;
+  }
+  .nav a{
+    text-decoration:none;
+    font-size:13px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid #1F2937;
+    background:#020617;
+    color:#E5E7EB;
+  }
+  .nav a:hover{
+    border-color:var(--accent);
+    color:#ECFDF5;
+  }
+
+  /* Branch summary */
+  .summary{
+    margin-bottom:22px;
+    border-radius:16px;
+    border:1px solid #111827;
+    background:#020617;
+    padding:14px 14px 10px;
+  }
+  .summary h2{
+    margin:0 0 10px;
+    font-size:15px;
+  }
+  .summary-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  .summary-table th,
+  .summary-table td{
+    padding:7px 6px;
+    text-align:left;
+    border-bottom:1px solid #111827;
+    vertical-align:middle;
+  }
+  .summary-table th{
+    font-weight:600;
+    color:#D1D5DB;
+    font-size:12px;
+  }
+  .summary-table tr:last-child th,
+  .summary-table tr:last-child td{
+    border-bottom:none;
+  }
+
+  .badge-status{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:500;
+  }
+  .dot-active{width:7px;height:7px;border-radius:999px;background:#34D399;}
+  .dot-progress{width:7px;height:7px;border-radius:999px;background:#FBBF24;}
+  .dot-planned{width:7px;height:7px;border-radius:999px;background:#3B82F6;}
+  .badge-active{background:rgba(52,211,153,0.1);color:#6EE7B7;}
+  .badge-progress{background:rgba(251,191,36,0.1);color:#FBBF24;}
+  .badge-planned{background:rgba(59,130,246,0.1);color:#93C5FD;}
+
+  .progress-shell{
+    width:120px;
+  }
+  .progress-track{
+    width:100%;
+    height:6px;
+    border-radius:999px;
+    background:#0F172A;
+    overflow:hidden;
+  }
+  .progress-bar{
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg,var(--accent),#6EE7B7);
+  }
+  .progress-label{
+    font-size:11px;
+    color:#9CA3AF;
+    margin-top:2px;
+  }
+
+  .link-inline a{
+    font-size:12px;
+    color:#A5B4FC;
+    text-decoration:none;
+  }
+  .link-inline a:hover{text-decoration:underline;}
+
+  /* Sections */
+  section{
+    margin-top:22px;
+    padding-top:10px;
+    border-top:1px solid #111827;
+  }
+  section:first-of-type{border-top:none;padding-top:0;}
+  section h2{
+    margin:0 0 8px;
+    font-size:16px;
+  }
+  section h3{
+    margin:8px 0 4px;
+    font-size:14px;
+  }
+  .meta{
+    font-size:12px;
+    color:#9CA3AF;
+    margin-bottom:8px;
+  }
+  ul.checklist{
+    list-style:none;
+    padding-left:0;
+    margin:6px 0 2px;
+    font-size:13px;
+  }
+  ul.checklist li{
+    margin-bottom:3px;
+  }
+  ul.checklist li::before{
+    content:"•";
+    color:#6EE7B7;
+    margin-right:6px;
+  }
+
+  .legend{
+    margin-top:10px;
+    font-size:11px;
+    color:#9CA3AF;
+  }
+
+  .archive{
+    margin-top:10px;
+    font-size:12px;
+    color:#9CA3AF;
+    background:#020617;
+    border-radius:12px;
+    padding:8px 10px;
+    border:1px dashed #1F2937;
+  }
+
+  .footer-note{
+    margin-top:18px;
+    font-size:11px;
+    color:#6B7280;
+  }
+
+  @media (max-width:640px){
+    .summary-table th:nth-child(2),
+    .summary-table td:nth-child(2){
+      display:none; /* hide Scope on narrow screens to keep it readable */
+    }
+    .progress-shell{width:90px;}
+  }
+</style>
+</head>
+<body>
+<!-- Password overlay -->
+<div id="password-overlay">
+  <div class="popup">
+    <h2>Enter Password</h2>
+    <input type="password" id="password-input" placeholder="Password" />
+    <button id="password-submit">Enter</button>
+    <div id="password-error" class="error">Incorrect password. Try again.</div>
+  </div>
+</div>
+<div class="wrap">
+  <h1>TradeProBuddy™ – Project Dashboard</h1>
+  <p class="subtitle">Control panel for the multi-trade TradePros / TradeProBuddy project (roofers, plumbers, electricians).</p>
+
+  <div class="pill-row">
+    <div class="pill pill-phase">
+      <span class="pill-dot"></span>
+      <strong>Phase:</strong> Early multi-trade MVP
+    </div>
+    <div class="pill">
+      <strong>Owner:</strong> Emile · BrainIT Consulting
+    </div>
+    <div class="pill">
+      <strong>Current focus:</strong> Contractor Profiles → Estimates → Reports
+    </div>
+  </div>
+
+  <!-- Top navigation -->
+  <div class="nav">
+    <a href="#n8n">n8n – Core Workflows</a>
+    <a href="#jotform">Jotform – Forms &amp; App UI</a>
+    <a href="#reports">Reports – HTML / XLSX</a>
+    <a href="#website">BrainIT Website</a>
+    <a href="#architecture">General Architecture</a>
+  </div>
+
+  <!-- Branch summary table -->
+  <div class="summary">
+    <h2>Branch Summary</h2>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Branch</th>
+          <th>Scope</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>Jump</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>n8n – Core Workflows</strong></td>
+          <td>Webhooks, routing, AI pipelines, contractor DB sync</td>
+          <td>
+            <span class="badge-status badge-active">
+              <span class="dot-active"></span> Active
+            </span>
+          </td>
+          <td>
+            <div class="progress-shell">
+              <div class="progress-track">
+                <div class="progress-bar" style="width:70%;"></div>
+              </div>
+              <div class="progress-label">70%</div>
+            </div>
+          </td>
+          <td class="link-inline"><a href="#n8n">Open section</a></td>
+        </tr>
+        <tr>
+          <td><strong>Jotform – Forms &amp; App UI</strong></td>
+          <td>Multi-trade survey forms + TradeProBuddy app</td>
+          <td>
+            <span class="badge-status badge-progress">
+              <span class="dot-progress"></span> In Progress
+            </span>
+          </td>
+          <td>
+            <div class="progress-shell">
+              <div class="progress-track">
+                <div class="progress-bar" style="width:50%;"></div>
+              </div>
+              <div class="progress-label">50%</div>
+            </div>
+          </td>
+          <td class="link-inline"><a href="#jotform">Open section</a></td>
+        </tr>
+        <tr>
+          <td><strong>Reports – HTML / XLSX</strong></td>
+          <td>Contractor profiles, job reports, exports</td>
+          <td>
+            <span class="badge-status badge-active">
+              <span class="dot-active"></span> Active
+            </span>
+          </td>
+          <td>
+            <div class="progress-shell">
+              <div class="progress-track">
+                <div class="progress-bar" style="width:80%;"></div>
+              </div>
+              <div class="progress-label">80%</div>
+            </div>
+          </td>
+          <td class="link-inline"><a href="#reports">Open section</a></td>
+        </tr>
+        <tr>
+          <td><strong>BrainIT Website – Pages & Embeds</strong></td>
+          <td>Landing flows, CTAs, demo embeds per trade</td>
+          <td>
+            <span class="badge-status badge-progress">
+              <span class="dot-progress"></span> In Progress
+            </span>
+          </td>
+          <td>
+            <div class="progress-shell">
+              <div class="progress-track">
+                <div class="progress-bar" style="width:40%;"></div>
+              </div>
+              <div class="progress-label">40%</div>
+            </div>
+          </td>
+          <td class="link-inline"><a href="#website">Open section</a></td>
+        </tr>
+        <tr>
+          <td><strong>General Architecture – Standards</strong></td>
+          <td>Naming, data models, versioning</td>
+          <td>
+            <span class="badge-status badge-planned">
+              <span class="dot-planned"></span> Planned / Evolving
+            </span>
+          </td>
+          <td>
+            <div class="progress-shell">
+              <div class="progress-track">
+                <div class="progress-bar" style="width:30%;"></div>
+              </div>
+              <div class="progress-label">30%</div>
+            </div>
+          </td>
+          <td class="link-inline"><a href="#architecture">Open section</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="legend">
+      Status: 🟢 Active · 🟡 In Progress · 🔵 Planned &nbsp;•&nbsp; Progress bars are rough effort/feature coverage.
+    </div>
+  </div>
+
+  <!-- Sections -->
+
+  <section id="n8n">
+    <h2>1️⃣ n8n – Core Workflows</h2>
+    <p class="meta">Anchor: <code>#n8n</code> · Status: Active · Target: Multi-trade routing &amp; estimates.</p>
+
+    <h3>Scope</h3>
+    <ul class="checklist">
+      <li>Global TradeProBuddy router based on <code>trade_type</code></li>
+      <li>Contractor profile upsert / sync with <code>contractor_profiles</code></li>
+      <li>Estimate generator flows for roofers → plumbers → electricians</li>
+      <li>HTML / email output nodes per persona (homeowner, adjuster, contractor)</li>
+      <li>Error handling and central logging for all estimate flows</li>
+    </ul>
+
+    <h3>Current Checkpoints</h3>
+    <ul class="checklist">
+      <li>Contractor Profiles HTML Report (V7) wired and branded (TradeProBuddy™)</li>
+      <li>Multi-trade contractor records (roofing + plumbing) live in DB</li>
+      <li>Router ready to branch per trade (plumbing, electrical next)</li>
+    </ul>
+  </section>
+
+  <section id="jotform">
+    <h2>2️⃣ Jotform – Forms &amp; App UI</h2>
+    <p class="meta">Anchor: <code>#jotform</code> · Status: In Progress.</p>
+
+    <h3>Scope</h3>
+    <ul class="checklist">
+      <li>Trade-specific site survey forms (Roofing, Plumbing, Electrical – USA-focused)</li>
+      <li>TradeProBuddy app container for end-users</li>
+      <li>Prefill logic for each contractor (no retyping company info every time)</li>
+      <li>Safe mode switching between structured form, chat, and voice guidance</li>
+    </ul>
+
+    <h3>Current Checkpoints</h3>
+    <ul class="checklist">
+      <li>Roofer survey form V1.6.x integrated with core n8n workflow</li>
+      <li>Contractor fields mapped to <code>contractor_profiles</code></li>
+      <li>Planning electrician survey content based on real field requirements</li>
+    </ul>
+  </section>
+
+  <section id="reports">
+    <h2>3️⃣ Reports – HTML / XLSX</h2>
+    <p class="meta">Anchor: <code>#reports</code> · Status: Active · Includes Contractor Profiles Report V1.0.0.</p>
+
+    <h3>Scope</h3>
+    <ul class="checklist">
+      <li>Contractor directory report (current: V7, version tag 1.0.0)</li>
+      <li>Job / estimate reports per trade</li>
+      <li>Downloadable Excel exports for filtered views</li>
+      <li>Consistent footer branding and version display</li>
+    </ul>
+
+    <h3>Delivered (Contractor Profiles Report V1.0.0)</h3>
+    <ul class="checklist">
+      <li>Dark UI with contractor count badge and timestamp</li>
+      <li>Sortable columns (desktop + tablet tap on header)</li>
+      <li>Filter by <code>trade_type</code> + “No contractors found for this trade” message</li>
+      <li>Export visible rows to Excel (<code>.xlsx</code>) via SheetJS</li>
+      <li>Footer: “Built on the TradeProBuddy™ AI platform from BrainIT Consulting”</li>
+      <li>Version text shown in header: <code>Version: 1.0.0</code></li>
+    </ul>
+  </section>
+
+  <section id="website">
+    <h2>4️⃣ BrainIT Website – Pages &amp; Embeds</h2>
+    <p class="meta">Anchor: <code>#website</code> · Status: In Progress.</p>
+
+    <h3>Scope</h3>
+    <ul class="checklist">
+      <li>TradeProBuddy landing flows from Trade Pros → Roofers / Plumbers / Electricians</li>
+      <li>Demo pages with embedded apps for each trade</li>
+      <li>Clear positioning and CTAs for each vertical</li>
+    </ul>
+
+    <h3>Current Checkpoints</h3>
+    <ul class="checklist">
+      <li>Roofers path wired: Trade Pros → Roofers → Roofer Demo</li>
+      <li>Plumbers and Electricians paths planned, not yet fully wired</li>
+    </ul>
+  </section>
+
+  <section id="architecture">
+    <h2>5️⃣ General Architecture – Standards &amp; Versioning</h2>
+    <p class="meta">Anchor: <code>#architecture</code> · Status: Planned / Evolving.</p>
+
+    <h3>Scope</h3>
+    <ul class="checklist">
+      <li>Standard <code>trade_type</code> values (e.g. <code>roofing</code>, <code>plumbing</code>, <code>electrical</code>)</li>
+      <li>Shared contractor schema (<code>contractor_profiles</code>)</li>
+      <li>Consistent workflow naming and versioning</li>
+      <li>Playbook for adding new trades without breaking existing flows</li>
+    </ul>
+
+    <h3>Conventions (Draft)</h3>
+    <ul class="checklist">
+      <li>Trade slugs: lowercase, singular (e.g. <code>roofing</code>, <code>plumbing</code>, <code>electrical</code>)</li>
+      <li>Reports: visible semantic version in UI (e.g. <code>Version: 1.0.0</code>)</li>
+      <li>Workflow names: <code>TradeProBuddy_&lt;trade&gt;_&lt;purpose&gt;_vX.YZ</code></li>
+    </ul>
+  </section>
+
+  <div class="archive">
+    <strong>Archive / Supporting Work</strong><br/>
+    Use this bucket for retired templates, old prompts, and legacy single-trade flows that you might still reference but don’t want in the main nav.
+  </div>
+
+  <div class="footer-note">
+    Tip: Use this dashboard as the “home base” for TradeProBuddy. When you spin up a deep dive (e.g. a new electrician router in n8n),
+    start from the relevant section and branch your chat from here.
+  </div>
+</div>
+</body>
+</html>
