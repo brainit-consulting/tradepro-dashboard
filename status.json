@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-12T20:16:38.889Z",
+  "updatedAt": "2025-12-12T20:40:57.395Z",
   "overall": {
     "badge": "In Progress - Testing n8n workflows & JSON controller",
     "headline": "Dashboard is now wired for auto updates.",
@@ -8,7 +8,7 @@
   "branches": {
     "n8n": {
       "status": "In Progress",
-      "progress": 81,
+      "progress": 82,
       "checkpoints": [
         "Global router → subflows handoff confirmed (roofing, plumbing, electrical)",
         "Electrical branch: end-to-end test run succeeded (AI output → Gmail send)",
