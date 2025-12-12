@@ -1,0 +1,15 @@
+{
+  "updatedAt": "2025-12-12T00:00:00Z",
+  "overall": {
+    "badge": "In Progress",
+    "headline": "Dashboard is now wired for auto updates.",
+    "notes": "Next: connect n8n to publish status.json automatically."
+  },
+  "branches": {
+    "n8n": { "status": "Active", "progress": 80 },
+    "forms": { "status": "In Progress", "progress": 55 },
+    "reports": { "status": "Active", "progress": 85 },
+    "website": { "status": "In Progress", "progress": 45 },
+    "architecture": { "status": "Planned", "progress": 40 }
+  }
+}
