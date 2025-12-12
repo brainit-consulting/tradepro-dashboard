@@ -1,15 +1,60 @@
 {
   "updatedAt": "2025-12-12T00:00:00Z",
   "overall": {
-    "badge": "In Progress - Testing n8n workflows",
+    "badge": "In Progress - Testing n8n workflows & JSON controller",
     "headline": "Dashboard is now wired for auto updates.",
     "notes": "Next: connect n8n to publish status.json automatically."
   },
   "branches": {
-    "n8n": { "status": "In Progress", "progress": 81 },
-    "forms": { "status": "In Progress", "progress": 75 },
-    "reports": { "status": "Active", "progress": 85 },
-    "website": { "status": "In Progress", "progress": 95 },
-    "architecture": { "status": "Planned", "progress": 40 }
+    "n8n": {
+      "status": "In Progress",
+      "progress": 81,
+      "checkpoints": [
+        "Global router → subflows handoff confirmed (roofing, plumbing, electrical)",
+        "Electrical branch: end-to-end test run succeeded (AI output → Gmail send)",
+        "Email To/Reply-To hardening added to prevent empty/invalid addresses from failing runs",
+        "Contractor Profiles HTML Report (V7) wired and branded (TradeProBuddy™)",
+        "Multi-trade contractor records (roofing + plumbing + electrical) live in DB"
+      ]
+    },
+    "forms": {
+      "status": "In Progress",
+      "progress": 75,
+      "checkpoints": [
+        "Roofer survey form V1.6.x integrated with core n8n workflow",
+        "Electrician form fields drafted (USA-only) and mapped to the Electrical subflow",
+        "Plumber form branch created; email field hardening in progress",
+        "App embed + demo pages working for Trade Pros entry points"
+      ]
+    },
+    "reports": {
+      "status": "Active",
+      "progress": 85,
+      "checkpoints": [
+        "Contractor / Homeowner / Adjuster HTML outputs implemented for roofing",
+        "Electrical estimate drafts polished by Style Expert and emailed end-to-end",
+        "Sortable Contractor Profiles HTML Report (V7) live for internal use",
+        "Status + progress dashboard live (this page)"
+      ]
+    },
+    "website": {
+      "status": "In Progress",
+      "progress": 95,
+      "checkpoints": [
+        "Trade Pros landing routes to Roofing / Electrical / Plumbing demos",
+        "Roofers demo page baseline preserved (gate + app + report modal)",
+        "Electrical demo page live and sending emails successfully",
+        "Copy updates: roofer-friendly messaging + disclaimers"
+      ]
+    },
+    "architecture": {
+      "status": "Planned",
+      "progress": 40,
+      "checkpoints": [
+        "Pre-Gmail guard node (validate recipients, log + continue)",
+        "Shared “Send Safe Email” subflow reused by all trades",
+        "Centralized email normalization (To/CC/BCC/Reply-To)"
+      ]
+    }
   }
 }
