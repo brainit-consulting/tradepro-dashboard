@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-12T00:00:00Z",
+  "updatedAt": "2025-12-12T20:16:38.889Z",
   "overall": {
     "badge": "In Progress - Testing n8n workflows & JSON controller",
     "headline": "Dashboard is now wired for auto updates.",
@@ -53,8 +53,8 @@
       "checkpoints": [
         "Pre-Gmail guard node (validate recipients, log + continue)",
         "Shared “Send Safe Email” subflow reused by all trades",
-        "Per From “Validate Form Thankyou Pages and Autoresponder emails",
-        "Centralized email normalization (To/CC/BCC/Reply-To)"
+        "Per Form: validate Thank You pages and autoresponder emails",
+        "Centralized email normalization (To / CC / BCC / Reply-To)"
       ]
     }
   }
