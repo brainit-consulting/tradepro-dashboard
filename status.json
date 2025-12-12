@@ -7,7 +7,7 @@
   },
   "branches": {
     "n8n": { "status": "Active", "progress": 81 },
-    "forms": { "status": "In Progress", "progress": 55 },
+    "forms": { "status": "In Progress", "progress": 75 },
     "reports": { "status": "Active", "progress": 85 },
     "website": { "status": "In Progress", "progress": 45 },
     "architecture": { "status": "Planned", "progress": 40 }
