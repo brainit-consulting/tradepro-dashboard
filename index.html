@@ -842,13 +842,16 @@ function setText(sel, txt){
       setText('[data-overall-notes]', status.overall.notes);
     }
 
-    // KPIs (optional)
+   // KPIs (optional)
     if(status.overall?.kpis?.focus?.title) setText('[data-kpi-focus]', status.overall.kpis.focus.title);
     if(status.overall?.kpis?.focus?.sub)   setText('[data-kpi-focus-sub]', status.overall.kpis.focus.sub);
-    if(status.overall?.kpis?.win?.title)   setText('[data-kpi-wintitle]', status.overall.kpis.win.title);
+    
+    if(status.overall?.kpis?.win?.title)   setText('[data-kpi-win]', status.overall.kpis.win.title);   // ✅ fixed selector
     if(status.overall?.kpis?.win?.sub)     setText('[data-kpi-win-sub]', status.overall.kpis.win.sub);
+    
     if(status.overall?.kpis?.risk?.title)  setText('[data-kpi-risk]', status.overall.kpis.risk.title);
     if(status.overall?.kpis?.risk?.sub)    setText('[data-kpi-risk-sub]', status.overall.kpis.risk.sub);
+
 
     // Branches
     const b = status.branches || {};
