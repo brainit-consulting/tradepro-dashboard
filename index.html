@@ -768,15 +768,19 @@
   <!-- Auto status loader (reads ./status.json and updates UI) -->
 <script>
   async function fetchStatusJson(){
+    const url = 'https://brainit-consulting.github.io/tradepro-dashboard/status.json?ts=' + Date.now();
     try{
-      const res = await fetch('./status.json?ts=' + Date.now(), { cache: 'no-store' });
-      if(!res.ok) throw new Error('status.json fetch failed: ' + res.status);
+      console.log('[dashboard] fetching', url);
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok) throw new Error('status fetch failed: ' + res.status);
       return await res.json();
     }catch(err){
-      console.warn('[dashboard] status.json not loaded, using defaults', err);
+      console.warn('[dashboard] status not loaded', err);
       return null;
     }
   }
+</script>
+
 
 function setText(sel, txt){
   const el = document.querySelector(sel);
