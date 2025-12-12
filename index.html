@@ -723,7 +723,129 @@
     </footer>
   </div>
 
- <script>
+  <script>
+  // ---------------------------------------------------------
+  // Auto status loader (reads status.json and updates UI)
+  // NOTE: "Updated:" (top-right) is hard-coded to local time for now.
+  // ---------------------------------------------------------
+
+  function formatLocalStamp(d){
+    try{
+      return d.toLocaleString(undefined, {
+        year:"numeric", month:"short", day:"2-digit",
+        hour:"2-digit", minute:"2-digit"
+      });
+    }catch(e){
+      return String(d);
+    }
+  }
+
+  function setHardcodedUpdatedNow(){
+    const el = document.querySelector('[data-updated]');
+    if(el) el.textContent = formatLocalStamp(new Date());
+  }
+
+  async function fetchStatusJson(){
+    const url = 'https://brainit-consulting.github.io/tradepro-dashboard/status.json?ts=' + Date.now();
+    try{
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok) throw new Error('status fetch failed: ' + res.status);
+      return await res.json();
+    }catch(err){
+      console.warn('[dashboard] status not loaded', err);
+      return null;
+    }
+  }
+
+  function setText(sel, txt){
+    const el = document.querySelector(sel);
+    if(el) el.textContent = (txt ?? '');
+  }
+
+  function setDotClass(dotEl, status){
+    if(!dotEl) return;
+    dotEl.classList.remove('ok','ip','bad');
+    const s = String(status || '').toLowerCase();
+    if(s.includes('active') || s.includes('done') || s.includes('success')) dotEl.classList.add('ok');
+    else if(s.includes('blocked') || s.includes('fail') || s.includes('error')) dotEl.classList.add('bad');
+    else dotEl.classList.add('ip');
+  }
+
+  function setBranchRow(branchKey, statusText, progress){
+    const row = document.querySelector(`[data-branch-row="${branchKey}"]`);
+    if(!row) return;
+
+    const statusEl = row.querySelector('[data-status]');
+    const dotEl = statusEl ? statusEl.querySelector('.dot') : null;
+    const fillEl = row.querySelector('[data-progress-fill]');
+    const pctEl  = row.querySelector('[data-progress-pct]');
+
+    if(statusEl){
+      // keep the existing dot element if present
+      const dot = statusEl.querySelector('.dot');
+      statusEl.textContent = '';
+      if(dot) statusEl.appendChild(dot);
+      statusEl.appendChild(document.createTextNode(' ' + (statusText ?? '')));
+    }
+
+    if(dotEl) setDotClass(dotEl, statusText);
+
+    const pct = Math.max(0, Math.min(100, Number(progress || 0)));
+    if(fillEl) fillEl.style.width = pct + '%';
+    if(pctEl) pctEl.textContent = pct + '%';
+  }
+
+  async function initAutoStatus(){
+    // hard-code the header timestamp for now
+    setHardcodedUpdatedNow();
+
+    const status = await fetchStatusJson();
+    if(!status) return;
+
+    // Overall badge + note
+    if(status.overall?.badge){
+      setText('[data-overall-badge]', status.overall.badge);
+      setDotClass(document.querySelector('[data-overall-dot]'), status.overall.badge);
+    }
+    if(status.overall?.notes){
+      setText('[data-overall-notes]', status.overall.notes);
+    }
+
+    // Optional KPI overrides
+    if(status.overall?.kpis?.focus?.title) setText('[data-kpi-focus]', status.overall.kpis.focus.title);
+    if(status.overall?.kpis?.focus?.sub)   setText('[data-kpi-focus-sub]', status.overall.kpis.focus.sub);
+
+    if(status.overall?.kpis?.win?.title)   setText('[data-kpi-win]', status.overall.kpis.win.title);
+    if(status.overall?.kpis?.win?.sub)     setText('[data-kpi-win-sub]', status.overall.kpis.win.sub);
+
+    if(status.overall?.kpis?.risk?.title)  setText('[data-kpi-risk]', status.overall.kpis.risk.title);
+    if(status.overall?.kpis?.risk?.sub)    setText('[data-kpi-risk-sub]', status.overall.kpis.risk.sub);
+
+    // Branch rows
+    const b = status.branches || {};
+    setBranchRow('n8n',          b.n8n?.status,          b.n8n?.progress);
+    setBranchRow('forms',        b.forms?.status,        b.forms?.progress);
+    setBranchRow('reports',      b.reports?.status,      b.reports?.progress);
+    setBranchRow('website',      b.website?.status,      b.website?.progress);
+    setBranchRow('architecture', b.architecture?.status, b.architecture?.progress);
+
+    // Right-card summary (optional)
+    if(status.overall?.summary){
+      setText('[data-branch-summary]', status.overall.summary);
+      setDotClass(document.querySelector('[data-branch-summary-dot]'), status.overall.summary);
+    }
+  }
+
+  // expose so the gate script can call it
+  window.initAutoStatus = initAutoStatus;
+
+  // set the hard-coded stamp immediately on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    setHardcodedUpdatedNow();
+  });
+</script>
+
+  <script>
   // keep password + behavior exactly
   (function(){
     const PASSWORD = "tradeprobuddy";
@@ -763,119 +885,6 @@
     }
   })();
 </script>
-
-
-  <!-- Auto status loader (reads ./status.json and updates UI) -->
-<script>
-  async function fetchStatusJson(){
-    const url = 'https://brainit-consulting.github.io/tradepro-dashboard/status.json?ts=' + Date.now();
-    try{
-      console.log('[dashboard] fetching', url);
-      const res = await fetch(url, { cache: 'no-store' });
-      if(!res.ok) throw new Error('status fetch failed: ' + res.status);
-      return await res.json();
-    }catch(err){
-      console.warn('[dashboard] status not loaded', err);
-      return null;
-    }
-  }
-</script>
-
-
-function setText(sel, txt){
-  const el = document.querySelector(sel);
-  if(el) el.textContent = (txt ?? '');
-}
-
-
-  function setDotClass(dotEl, status){
-    if(!dotEl) return;
-    dotEl.classList.remove('ok','ip','bad');
-    const s = String(status || '').toLowerCase();
-    if(s.includes('active') || s.includes('done') || s.includes('success')) dotEl.classList.add('ok');
-    else if(s.includes('blocked') || s.includes('fail') || s.includes('error')) dotEl.classList.add('bad');
-    else dotEl.classList.add('ip');
-  }
-
-  function setBranchRow(branchKey, statusText, progress){
-    const row = document.querySelector(`[data-branch-row="${branchKey}"]`);
-    if(!row) return;
-
-    const statusEl = row.querySelector('[data-status]');
-    const dotEl = statusEl ? statusEl.querySelector('.dot') : null;
-    const fillEl = row.querySelector('[data-progress-fill]');
-    const pctEl  = row.querySelector('[data-progress-pct]');
-
-    if(statusEl && typeof statusText === 'string'){
-      const dot = statusEl.querySelector('.dot');
-      statusEl.textContent = '';
-      if(dot) statusEl.appendChild(dot);
-      statusEl.appendChild(document.createTextNode(' ' + statusText));
-    }
-
-    if(dotEl) setDotClass(dotEl, statusText);
-
-    const pct = Math.max(0, Math.min(100, Number(progress || 0)));
-    if(fillEl) fillEl.style.width = pct + '%';
-    if(pctEl) pctEl.textContent = pct + '%';
-  }
-
-  async function initAutoStatus(){
-    const status = await fetchStatusJson();
-    if(!status) return;
-
-    // Updated timestamp (ONLY from JSON)
-    if(status.updatedAt){
-      const d = new Date(status.updatedAt);
-      const el = document.querySelector('[data-updated]');
-      if(el && !isNaN(d.getTime())){
-        el.textContent = d.toLocaleString(undefined, {
-          year:"numeric", month:"short", day:"2-digit",
-          hour:"2-digit", minute:"2-digit"
-        });
-      }
-    }
-
-    // Overall
-    if(status.overall?.badge){
-      setText('[data-overall-badge]', status.overall.badge);
-      setDotClass(document.querySelector('[data-overall-dot]'), status.overall.badge);
-    }
-
-    if(status.overall?.notes){
-      setText('[data-overall-notes]', status.overall.notes);
-    }
-
-   // KPIs (optional)
-    if(status.overall?.kpis?.focus?.title) setText('[data-kpi-focus]', status.overall.kpis.focus.title);
-    if(status.overall?.kpis?.focus?.sub)   setText('[data-kpi-focus-sub]', status.overall.kpis.focus.sub);
-    
-    if(status.overall?.kpis?.win?.title)   setText('[data-kpi-win]', status.overall.kpis.win.title);   // ✅ fixed selector
-    if(status.overall?.kpis?.win?.sub)     setText('[data-kpi-win-sub]', status.overall.kpis.win.sub);
-    
-    if(status.overall?.kpis?.risk?.title)  setText('[data-kpi-risk]', status.overall.kpis.risk.title);
-    if(status.overall?.kpis?.risk?.sub)    setText('[data-kpi-risk-sub]', status.overall.kpis.risk.sub);
-
-
-    // Branches
-    const b = status.branches || {};
-    setBranchRow('n8n',          b.n8n?.status,          b.n8n?.progress);
-    setBranchRow('forms',        b.forms?.status,        b.forms?.progress);
-    setBranchRow('reports',      b.reports?.status,      b.reports?.progress);
-    setBranchRow('website',      b.website?.status,      b.website?.progress);
-    setBranchRow('architecture', b.architecture?.status, b.architecture?.progress);
-
-    // Right card summary (optional)
-    if(status.overall?.summary){
-      setText('[data-branch-summary]', status.overall.summary);
-      setDotClass(document.querySelector('[data-branch-summary-dot]'), status.overall.summary);
-    }
-  }
-
-  // expose once
-  window.initAutoStatus = initAutoStatus;
-</script>
-
 
 </body>
 </html>
