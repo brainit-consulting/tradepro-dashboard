@@ -745,6 +745,7 @@
           gateOverlay.style.display = "none";
           app.style.display = "block";
           try{ localStorage.setItem("tpb_dash_ok","1"); }catch(e){}
+          try { initAutoStatus(); } catch(e) {}
         }else{
           err.style.display = "block";
           input.focus();
@@ -759,6 +760,7 @@
         if (localStorage.getItem("tpb_dash_ok") === "1"){
           gateOverlay.style.display = "none";
           app.style.display = "block";
+          try { initAutoStatus(); } catch(e) {}
         }else{
           input.focus();
         }
@@ -771,6 +773,8 @@
   <!-- Auto status loader (reads ./status.json and updates UI) -->
   <script>
     async function loadStatusJson(){
+      const status = await loadStatusJson();
+      if(!status) return;
       try{
         const res = await fetch('./status.json?ts=' + Date.now(), { cache: 'no-store' });
         if(!res.ok) throw new Error('status.json fetch failed: ' + res.status);
