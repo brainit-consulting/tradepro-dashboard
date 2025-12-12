@@ -723,52 +723,47 @@
     </footer>
   </div>
 
-  <script>
-    // keep password + behavior exactly
-    (function(){
-      const PASSWORD = "tradeprobuddy";
-      const gateOverlay = document.getElementById("gateOverlay");
-      const app = document.getElementById("app");
-      const input = document.getElementById("gateInput");
-      const btn = document.getElementById("gateBtn");
-      const err = document.getElementById("gateErr");
+ <script>
+  // keep password + behavior exactly
+  (function(){
+    const PASSWORD = "tradeprobuddy";
+    const gateOverlay = document.getElementById("gateOverlay");
+    const app = document.getElementById("app");
+    const input = document.getElementById("gateInput");
+    const btn = document.getElementById("gateBtn");
+    const err = document.getElementById("gateErr");
 
-      const updatedDate = document.getElementById("updatedDate");
-      if (updatedDate){
-        const d = new Date();
-        updatedDate.textContent = d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    function unlock(){
+      const v = String(input.value || "").trim();
+      if (v === PASSWORD){
+        gateOverlay.style.display = "none";
+        app.style.display = "block";
+        try{ localStorage.setItem("tpb_dash_ok","1"); }catch(e){}
+        try{ window.initAutoStatus && window.initAutoStatus(); }catch(e){}
+      }else{
+        err.style.display = "block";
+        input.focus();
+        input.select();
       }
+    }
 
-      function unlock(){
-        const v = String(input.value || "").trim();
-        if (v === PASSWORD){
-          gateOverlay.style.display = "none";
-          app.style.display = "block";
-          try{ localStorage.setItem("tpb_dash_ok","1"); }catch(e){}
-          try { initAutoStatus(); } catch(e) {}
-        }else{
-          err.style.display = "block";
-          input.focus();
-          input.select();
-        }
-      }
+    btn.addEventListener("click", unlock);
+    input.addEventListener("keydown", (e)=>{ if (e.key === "Enter") unlock(); });
 
-      btn.addEventListener("click", unlock);
-      input.addEventListener("keydown", (e)=>{ if (e.key === "Enter") unlock(); });
-
-      try{
-        if (localStorage.getItem("tpb_dash_ok") === "1"){
-          gateOverlay.style.display = "none";
-          app.style.display = "block";
-          try { initAutoStatus(); } catch(e) {}
-        }else{
-          input.focus();
-        }
-      }catch(e){
+    try{
+      if (localStorage.getItem("tpb_dash_ok") === "1"){
+        gateOverlay.style.display = "none";
+        app.style.display = "block";
+        try{ window.initAutoStatus && window.initAutoStatus(); }catch(e){}
+      }else{
         input.focus();
       }
-    })();
-  </script>
+    }catch(e){
+      input.focus();
+    }
+  })();
+</script>
+
 
   <!-- Auto status loader (reads ./status.json and updates UI) -->
 <script>
@@ -785,7 +780,7 @@
 
   function setText(sel, txt){
     const el = document.querySelector(sel);
-    if(el) el.textContent = (txt ?? '');
+    if(el && typeof txt === 'string') el.textContent = txt;
   }
 
   function setDotClass(dotEl, status){
@@ -810,7 +805,7 @@
       const dot = statusEl.querySelector('.dot');
       statusEl.textContent = '';
       if(dot) statusEl.appendChild(dot);
-      statusEl.appendChild(document.createTextNode(statusText));
+      statusEl.appendChild(document.createTextNode(' ' + statusText));
     }
 
     if(dotEl) setDotClass(dotEl, statusText);
@@ -824,35 +819,37 @@
     const status = await fetchStatusJson();
     if(!status) return;
 
-    // Updated timestamp
+    // Updated timestamp (ONLY from JSON)
     if(status.updatedAt){
       const d = new Date(status.updatedAt);
       const el = document.querySelector('[data-updated]');
       if(el && !isNaN(d.getTime())){
         el.textContent = d.toLocaleString(undefined, {
-          year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"
+          year:"numeric", month:"short", day:"2-digit",
+          hour:"2-digit", minute:"2-digit"
         });
       }
     }
 
-    // Overall badge + note
+    // Overall
     if(status.overall?.badge){
       setText('[data-overall-badge]', status.overall.badge);
       setDotClass(document.querySelector('[data-overall-dot]'), status.overall.badge);
     }
+
     if(status.overall?.notes){
       setText('[data-overall-notes]', status.overall.notes);
     }
 
-    // Optional KPI overrides
+    // KPIs (optional)
     if(status.overall?.kpis?.focus?.title) setText('[data-kpi-focus]', status.overall.kpis.focus.title);
     if(status.overall?.kpis?.focus?.sub)   setText('[data-kpi-focus-sub]', status.overall.kpis.focus.sub);
-    if(status.overall?.kpis?.win?.title)   setText('[data-kpi-win]', status.overall.kpis.win.title);
+    if(status.overall?.kpis?.win?.title)   setText('[data-kpi-wintitle', status.overall.kpis.win.title);
     if(status.overall?.kpis?.win?.sub)     setText('[data-kpi-win-sub]', status.overall.kpis.win.sub);
     if(status.overall?.kpis?.risk?.title)  setText('[data-kpi-risk]', status.overall.kpis.risk.title);
     if(status.overall?.kpis?.risk?.sub)    setText('[data-kpi-risk-sub]', status.overall.kpis.risk.sub);
 
-    // Branch rows
+    // Branches
     const b = status.branches || {};
     setBranchRow('n8n',          b.n8n?.status,          b.n8n?.progress);
     setBranchRow('forms',        b.forms?.status,        b.forms?.progress);
@@ -860,16 +857,17 @@
     setBranchRow('website',      b.website?.status,      b.website?.progress);
     setBranchRow('architecture', b.architecture?.status, b.architecture?.progress);
 
-    // Right-card summary (optional)
+    // Right card summary (optional)
     if(status.overall?.summary){
       setText('[data-branch-summary]', status.overall.summary);
       setDotClass(document.querySelector('[data-branch-summary-dot]'), status.overall.summary);
     }
   }
 
-  // Expose so the gate script can call it after unlock
+  // expose once
   window.initAutoStatus = initAutoStatus;
 </script>
+
 
 </body>
 </html>
