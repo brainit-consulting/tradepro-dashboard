@@ -49,10 +49,11 @@
     },
     "architecture": {
       "status": "Planned",
-      "progress": 40,
+      "progress": 50,
       "checkpoints": [
         "Pre-Gmail guard node (validate recipients, log + continue)",
         "Shared “Send Safe Email” subflow reused by all trades",
+        "Per From “Validate Form Thankyou Pages and Autoresponder emails",
         "Centralized email normalization (To/CC/BCC/Reply-To)"
       ]
     }
