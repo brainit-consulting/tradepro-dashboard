@@ -6,7 +6,7 @@
     "notes": "Next: connect n8n to publish status.json automatically."
   },
   "branches": {
-    "n8n": { "status": "Active", "progress": 80 },
+    "n8n": { "status": "Active", "progress": 81 },
     "forms": { "status": "In Progress", "progress": 55 },
     "reports": { "status": "Active", "progress": 85 },
     "website": { "status": "In Progress", "progress": 45 },
