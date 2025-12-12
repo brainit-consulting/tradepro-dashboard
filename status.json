@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2025-12-12T22:20:10.001Z",
+  "updatedAt": "2025-12-12T22:39:16.840Z",
   "overall": {
     "badge": "In Progress - Testing n8n workflows & JSON controller",
     "headline": "Dashboard is now wired for auto updates.",
-    "notes": "Next: connect n8n to publish status.json automatically."
+    "notes": "Next: Critical Task is updating n8n flows and testing them for edge cases with Active Status webhooks."
   },
   "branches": {
     "n8n": {
