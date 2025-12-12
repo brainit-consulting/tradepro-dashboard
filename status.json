@@ -1,12 +1,12 @@
 {
   "updatedAt": "2025-12-12T00:00:00Z",
   "overall": {
-    "badge": "In Progress - Testing JSON LOAD",
+    "badge": "In Progress - Testing n8n workflows",
     "headline": "Dashboard is now wired for auto updates.",
     "notes": "Next: connect n8n to publish status.json automatically."
   },
   "branches": {
-    "n8n": { "status": "Active", "progress": 81 },
+    "n8n": { "status": "In Progress", "progress": 81 },
     "forms": { "status": "In Progress", "progress": 75 },
     "reports": { "status": "Active", "progress": 85 },
     "website": { "status": "In Progress", "progress": 95 },
