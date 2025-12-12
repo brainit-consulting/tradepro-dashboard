@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-12T20:40:57.395Z",
+  "updatedAt": "2025-12-12T22:20:10.001Z",
   "overall": {
     "badge": "In Progress - Testing n8n workflows & JSON controller",
     "headline": "Dashboard is now wired for auto updates.",
@@ -8,7 +8,7 @@
   "branches": {
     "n8n": {
       "status": "In Progress",
-      "progress": 82,
+      "progress": 87,
       "checkpoints": [
         "Global router → subflows handoff confirmed (roofing, plumbing, electrical)",
         "Electrical branch: end-to-end test run succeeded (AI output → Gmail send)",
@@ -19,7 +19,7 @@
     },
     "forms": {
       "status": "In Progress",
-      "progress": 75,
+      "progress": 59,
       "checkpoints": [
         "Roofer survey form V1.6.x integrated with core n8n workflow",
         "Electrician form fields drafted (USA-only) and mapped to the Electrical subflow",
