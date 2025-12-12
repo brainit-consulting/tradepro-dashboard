@@ -771,104 +771,105 @@
   </script>
 
   <!-- Auto status loader (reads ./status.json and updates UI) -->
-  <script>
-    async function loadStatusJson(){
-      const status = await loadStatusJson();
-      if(!status) return;
-      try{
-        const res = await fetch('./status.json?ts=' + Date.now(), { cache: 'no-store' });
-        if(!res.ok) throw new Error('status.json fetch failed: ' + res.status);
-        return await res.json();
-      }catch(err){
-        console.warn('[dashboard] status.json not loaded, using defaults', err);
-        return null;
+<script>
+  async function fetchStatusJson(){
+    try{
+      const res = await fetch('./status.json?ts=' + Date.now(), { cache: 'no-store' });
+      if(!res.ok) throw new Error('status.json fetch failed: ' + res.status);
+      return await res.json();
+    }catch(err){
+      console.warn('[dashboard] status.json not loaded, using defaults', err);
+      return null;
+    }
+  }
+
+  function setText(sel, txt){
+    const el = document.querySelector(sel);
+    if(el) el.textContent = (txt ?? '');
+  }
+
+  function setDotClass(dotEl, status){
+    if(!dotEl) return;
+    dotEl.classList.remove('ok','ip','bad');
+    const s = String(status || '').toLowerCase();
+    if(s.includes('active') || s.includes('done') || s.includes('success')) dotEl.classList.add('ok');
+    else if(s.includes('blocked') || s.includes('fail') || s.includes('error')) dotEl.classList.add('bad');
+    else dotEl.classList.add('ip');
+  }
+
+  function setBranchRow(branchKey, statusText, progress){
+    const row = document.querySelector(`[data-branch-row="${branchKey}"]`);
+    if(!row) return;
+
+    const statusEl = row.querySelector('[data-status]');
+    const dotEl = statusEl ? statusEl.querySelector('.dot') : null;
+    const fillEl = row.querySelector('[data-progress-fill]');
+    const pctEl  = row.querySelector('[data-progress-pct]');
+
+    if(statusEl && typeof statusText === 'string'){
+      const dot = statusEl.querySelector('.dot');
+      statusEl.textContent = '';
+      if(dot) statusEl.appendChild(dot);
+      statusEl.appendChild(document.createTextNode(statusText));
+    }
+
+    if(dotEl) setDotClass(dotEl, statusText);
+
+    const pct = Math.max(0, Math.min(100, Number(progress || 0)));
+    if(fillEl) fillEl.style.width = pct + '%';
+    if(pctEl) pctEl.textContent = pct + '%';
+  }
+
+  async function initAutoStatus(){
+    const status = await fetchStatusJson();
+    if(!status) return;
+
+    // Updated timestamp
+    if(status.updatedAt){
+      const d = new Date(status.updatedAt);
+      const el = document.querySelector('[data-updated]');
+      if(el && !isNaN(d.getTime())){
+        el.textContent = d.toLocaleString(undefined, {
+          year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit"
+        });
       }
     }
 
-    function setText(sel, txt){
-      const el = document.querySelector(sel);
-      if(el) el.textContent = (txt ?? '');
+    // Overall badge + note
+    if(status.overall?.badge){
+      setText('[data-overall-badge]', status.overall.badge);
+      setDotClass(document.querySelector('[data-overall-dot]'), status.overall.badge);
+    }
+    if(status.overall?.notes){
+      setText('[data-overall-notes]', status.overall.notes);
     }
 
-    function setDotClass(dotEl, status){
-      if(!dotEl) return;
-      dotEl.classList.remove('ok','ip','bad');
-      const s = String(status || '').toLowerCase();
-      if(s.includes('active') || s.includes('done') || s.includes('success')) dotEl.classList.add('ok');
-      else if(s.includes('blocked') || s.includes('fail') || s.includes('error')) dotEl.classList.add('bad');
-      else dotEl.classList.add('ip');
+    // Optional KPI overrides
+    if(status.overall?.kpis?.focus?.title) setText('[data-kpi-focus]', status.overall.kpis.focus.title);
+    if(status.overall?.kpis?.focus?.sub)   setText('[data-kpi-focus-sub]', status.overall.kpis.focus.sub);
+    if(status.overall?.kpis?.win?.title)   setText('[data-kpi-win]', status.overall.kpis.win.title);
+    if(status.overall?.kpis?.win?.sub)     setText('[data-kpi-win-sub]', status.overall.kpis.win.sub);
+    if(status.overall?.kpis?.risk?.title)  setText('[data-kpi-risk]', status.overall.kpis.risk.title);
+    if(status.overall?.kpis?.risk?.sub)    setText('[data-kpi-risk-sub]', status.overall.kpis.risk.sub);
+
+    // Branch rows
+    const b = status.branches || {};
+    setBranchRow('n8n',          b.n8n?.status,          b.n8n?.progress);
+    setBranchRow('forms',        b.forms?.status,        b.forms?.progress);
+    setBranchRow('reports',      b.reports?.status,      b.reports?.progress);
+    setBranchRow('website',      b.website?.status,      b.website?.progress);
+    setBranchRow('architecture', b.architecture?.status, b.architecture?.progress);
+
+    // Right-card summary (optional)
+    if(status.overall?.summary){
+      setText('[data-branch-summary]', status.overall.summary);
+      setDotClass(document.querySelector('[data-branch-summary-dot]'), status.overall.summary);
     }
+  }
 
-    function setBranchRow(branchKey, statusText, progress){
-      const row = document.querySelector(`[data-branch-row="${branchKey}"]`);
-      if(!row) return;
+  // Expose so the gate script can call it after unlock
+  window.initAutoStatus = initAutoStatus;
+</script>
 
-      const statusEl = row.querySelector('[data-status]');
-      const dotEl = statusEl ? statusEl.querySelector('.dot') : null;
-      const fillEl = row.querySelector('[data-progress-fill]');
-      const pctEl  = row.querySelector('[data-progress-pct]');
-
-      if(statusEl && statusText){
-        // Keep dot element if present, only replace the text node after it
-        const dot = statusEl.querySelector('.dot');
-        statusEl.textContent = '';
-        if(dot) statusEl.appendChild(dot);
-        statusEl.appendChild(document.createTextNode(statusText));
-      }
-
-      if(dotEl) setDotClass(dotEl, statusText);
-
-      const pct = Math.max(0, Math.min(100, Number(progress || 0)));
-      if(fillEl) fillEl.style.width = pct + '%';
-      if(pctEl) pctEl.textContent = pct + '%';
-    }
-
-    (async function initAutoStatus(){
-      const status = await loadStatusJson();
-      if(!status) return;
-
-      // Updated timestamp
-      if(status.updatedAt){
-        const d = new Date(status.updatedAt);
-        const el = document.querySelector('[data-updated]');
-        if(el && !isNaN(d.getTime())){
-          el.textContent = d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-        }
-      }
-
-      // Overall badge + note
-      if(status.overall?.badge){
-        setText('[data-overall-badge]', status.overall.badge);
-        setDotClass(document.querySelector('[data-overall-dot]'), status.overall.badge);
-      }
-      if(status.overall?.notes){
-        setText('[data-overall-notes]', status.overall.notes);
-      }
-
-      // Optional KPI overrides (only if present in JSON)
-      if(status.overall?.kpis?.focus?.title) setText('[data-kpi-focus]', status.overall.kpis.focus.title);
-      if(status.overall?.kpis?.focus?.sub)   setText('[data-kpi-focus-sub]', status.overall.kpis.focus.sub);
-      if(status.overall?.kpis?.win?.title)   setText('[data-kpi-win]', status.overall.kpis.win.title);
-      if(status.overall?.kpis?.win?.sub)     setText('[data-kpi-win-sub]', status.overall.kpis.win.sub);
-      if(status.overall?.kpis?.risk?.title)  setText('[data-kpi-risk]', status.overall.kpis.risk.title);
-      if(status.overall?.kpis?.risk?.sub)    setText('[data-kpi-risk-sub]', status.overall.kpis.risk.sub);
-
-      // Branch rows
-      const b = status.branches || {};
-      setBranchRow('n8n',          b.n8n?.status,          b.n8n?.progress);
-      setBranchRow('forms',        b.forms?.status,        b.forms?.progress);
-      setBranchRow('reports',      b.reports?.status,      b.reports?.progress);
-      setBranchRow('website',      b.website?.status,      b.website?.progress);
-      setBranchRow('architecture', b.architecture?.status, b.architecture?.progress);
-
-      // Right-card summary (optional)
-      if(status.overall?.summary){
-        setText('[data-branch-summary]', status.overall.summary);
-      }
-      if(status.overall?.summary){
-        setDotClass(document.querySelector('[data-branch-summary-dot]'), status.overall.summary);
-      }
-    })();
-  </script>
 </body>
 </html>
