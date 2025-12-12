@@ -598,7 +598,7 @@
       <div class="card section" id="n8n">
         <div class="hd">
           <h2>n8n Workflows</h2>
-          <div class="pill"><span class="dot ok"></span>Active</div>
+          <div class="pill" data-detail-pill="n8n"><span class="dot ok" data-detail-dot="n8n"></span><span data-detail-text="n8n">Active</span></div>
         </div>
         <div class="bd">
           <p class="small">
@@ -607,7 +607,7 @@
 
           <div class="section">
             <h3>Current Checkpoints</h3>
-            <ul class="checklist">
+            <ul class="checklist" data-checklist="n8n">
               <li>Global router → subflows handoff confirmed (roofing, plumbing, electrical)</li>
               <li>Electrical branch: end-to-end test run succeeded (AI output → Gmail send)</li>
               <li>Email To/Reply-To hardening added to prevent empty/invalid addresses from failing runs</li>
@@ -621,7 +621,7 @@
       <div class="card section" id="jotform">
         <div class="hd">
           <h2>Forms &amp; Apps</h2>
-          <div class="pill"><span class="dot ip"></span>In Progress</div>
+          <div class="pill" data-detail-pill="forms"><span class="dot ip" data-detail-dot="forms"></span><span data-detail-text="forms">In Progress</span></div>
         </div>
         <div class="bd">
           <p class="small">
@@ -630,7 +630,7 @@
 
           <div class="section">
             <h3>Current Checkpoints</h3>
-            <ul class="checklist">
+            <ul class="checklist" data-checklist="forms">
               <li>Roofer survey form V1.6.x integrated with core n8n workflow</li>
               <li>Electrician form fields and flow drafted (USA-only) and mapped to the Electrical subflow</li>
               <li>Plumber form branch created; hardening for email fields in progress</li>
@@ -645,7 +645,7 @@
       <div class="card section" id="reports">
         <div class="hd">
           <h2>Reports</h2>
-          <div class="pill"><span class="dot ok"></span>Active</div>
+          <div class="pill" data-detail-pill="reports"><span class="dot ok" data-detail-dot="reports"></span><span data-detail-text="reports">Active</span></div>
         </div>
         <div class="bd">
           <p class="small">
@@ -654,7 +654,7 @@
 
           <div class="section">
             <h3>Current Checkpoints</h3>
-            <ul class="checklist">
+            <ul class="checklist" data-checklist="reports">
               <li>Contractor / Homeowner / Adjuster HTML outputs implemented for roofing</li>
               <li>Electrical estimate drafts polished by Style Expert and successfully emailed (end-to-end)</li>
               <li>Sortable Contractor Profiles HTML Report (V7) live for internal use</li>
@@ -667,7 +667,7 @@
       <div class="card section" id="website">
         <div class="hd">
           <h2>Website</h2>
-          <div class="pill"><span class="dot ip"></span>In Progress</div>
+          <div class="pill" data-detail-pill="website"><span class="dot ip" data-detail-dot="website"></span><span data-detail-text="website">In Progress</span></div>
         </div>
         <div class="bd">
           <p class="small">
@@ -676,7 +676,7 @@
 
           <div class="section">
             <h3>Current Checkpoints</h3>
-            <ul class="checklist">
+            <ul class="checklist" data-checklist="website">
               <li>Trade Pros landing page routes to Roofing / Electrical / Plumbing demos</li>
               <li>Roofers demo page live (app + password gate + report modal baseline preserved)</li>
               <li>Electrical demo page live and sending emails successfully</li>
@@ -690,7 +690,7 @@
     <div class="card section" id="architecture" style="margin-top:18px;">
       <div class="hd">
         <h2>Architecture</h2>
-        <div class="pill"><span class="dot ip"></span>Planned</div>
+        <div class="pill" data-detail-pill="architecture"><span class="dot ip" data-detail-dot="architecture"></span><span data-detail-text="architecture">Planned</span></div>
       </div>
       <div class="bd">
         <p class="small">
@@ -699,7 +699,7 @@
 
         <div class="section">
           <h3>Conventions</h3>
-          <ul class="checklist">
+          <ul class="checklist" data-checklist="architecture">
             <li><span class="check"></span><div><strong>Single source of truth</strong> for key fields (company, owner, homeowner, adjuster)</div></li>
             <li><span class="check"></span><div><strong>Normalize once</strong> (trim/dedupe/validate emails) before any send step</div></li>
             <li><span class="check"></span><div><strong>Fail soft</strong>: log + continue when optional downstream actions fail</div></li>
@@ -795,6 +795,27 @@
     if(pctEl) pctEl.textContent = pct + '%';
   }
 
+
+  function setDetailStatus(branchKey, statusText){
+    const txtEl = document.querySelector(`[data-detail-text="${branchKey}"]`);
+    const dotEl = document.querySelector(`[data-detail-dot="${branchKey}"]`);
+    if(txtEl) txtEl.textContent = (statusText ?? '');
+    if(dotEl) setDotClass(dotEl, statusText);
+  }
+
+  function setChecklist(branchKey, items){
+    const ul = document.querySelector(`[data-checklist="${branchKey}"]`);
+    if(!ul || !Array.isArray(items)) return;
+    ul.innerHTML = '';
+    for(const raw of items){
+      const t = (typeof raw === 'string') ? raw.trim() : '';
+      if(!t) continue;
+      const li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    }
+  }
+
   async function initAutoStatus(){
     // hard-code the header timestamp for now
     setHardcodedUpdatedNow();
@@ -828,6 +849,19 @@
     setBranchRow('reports',      b.reports?.status,      b.reports?.progress);
     setBranchRow('website',      b.website?.status,      b.website?.progress);
     setBranchRow('architecture', b.architecture?.status, b.architecture?.progress);
+
+    // Detail card pills + checklists (optional)
+    setDetailStatus('n8n',          b.n8n?.status);
+    setDetailStatus('forms',        b.forms?.status);
+    setDetailStatus('reports',      b.reports?.status);
+    setDetailStatus('website',      b.website?.status);
+    setDetailStatus('architecture', b.architecture?.status);
+
+    setChecklist('n8n',          b.n8n?.checkpoints || b.n8n?.currentCheckpoints);
+    setChecklist('forms',        b.forms?.checkpoints || b.forms?.currentCheckpoints);
+    setChecklist('reports',      b.reports?.checkpoints || b.reports?.currentCheckpoints);
+    setChecklist('website',      b.website?.checkpoints || b.website?.currentCheckpoints);
+    setChecklist('architecture', b.architecture?.checkpoints || b.architecture?.currentCheckpoints);
 
     // Right-card summary (optional)
     if(status.overall?.summary){
