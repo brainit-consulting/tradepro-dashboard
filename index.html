@@ -355,6 +355,7 @@
             <div class="kpi">
               <p class="label">Rolling Forward</p>
               <p class="value" id="overallBadge2">-</p>
+              <p class="sub" style="margin-top:10px" id="overallProgress">Overall progress: -</p>
               <p class="sub" id="overallSummary">-</p>
             </div>
           </div>
@@ -580,6 +581,13 @@
       $("overallHeadline").textContent = STATE.overall.headline || "-";
       $("overallNotes").textContent = STATE.overall.notes || "-";
 
+      // Option D — Overall roll-up progress (average of branch progress)
+      (function(){
+        const vals = Object.values(STATE.branches || {}).map(b => clamp(Number((b && b.progress) || 0), 0, 100));
+        const avg = vals.length ? Math.round(vals.reduce((a,c)=>a+c,0) / vals.length) : 0;
+        const el = $("overallProgress");
+        if(el) el.textContent = "Overall progress: " + avg + "%";
+      })();
       const sum = (STATE.overall.summary || "").trim();
       $("overallSummary").textContent = sum || "-";
       const pill = $("overallSummaryPill");
