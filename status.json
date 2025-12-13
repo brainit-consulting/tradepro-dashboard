@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-13T19:54:52.931Z",
+  "updatedAt": "2025-12-13T22:05:52.657Z",
   "overall": {
     "badge": "In Progress",
     "headline": "Dashboard is now wired for auto updates.",
@@ -18,7 +18,7 @@
       "status": "In Development",
       "progress": 50,
       "checkpoints": [
-        "Roofers - Roofer App & Estimate Workflow\nPlumbers - Service Request → Job Ticket → Estimate\nElectricians - Safety Checks, Reports & Quote Automation"
+        "Roofers - Roofer App & Estimate Workflow\nPlumbers - Service Request → Job Ticket → Estimate\nElectricians - Safety Checks, Reports & Quote Automation\nIn Memory Form for the Dashboard -> n8n -> status.json on GitHub -> Website"
       ]
     },
     "reports": {
