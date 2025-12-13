@@ -10,7 +10,7 @@
       "status": "In Progress",
       "progress": 82,
       "checkpoints": [
-        "Build prototype jotform submission to upload to webhook then to gitbhub**alpha**buggy"
+        "Build prototype jotform submission to upload to webhook then to gitbhub"
         "Global router to subflows handoff confirmed",
         "Electrical branch end-to-end test run succeeded",
         "Email hardening added to prevent empty addresses from failing runs",
@@ -40,7 +40,7 @@
     },
     "website": {
       "status": "In Progress",
-      "progress": 95,
+      "progress": 85,
       "checkpoints": [
         "Trade Pros landing routes to Roofing Electrical Plumbing demos",
         "Roofers demo page baseline preserved (gate plus app plus report modal)",
