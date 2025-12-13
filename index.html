@@ -1,1288 +1,833 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TradeProBuddy — Interactive Project Dashboard</title>
+  <title>TradeProBuddy - Interactive Project Dashboard</title>
+  <meta name="color-scheme" content="dark light" />
   <style>
     :root{
-      --bg:#070a12;
-      --card:rgba(255,255,255,.06);
-      --card2:rgba(255,255,255,.075);
+      --bg:#0b1220;
+      --card:#0f1b33;
+      --card2:#0b1428;
+      --ink:#e5e7eb;
+      --muted:#9aa7bd;
       --line:rgba(148,163,184,.18);
-      --text:#e5e7eb;
-      --muted:#aab3c2;
-      --brand:#7B3FA0;
-      --mint:#34D399;
-      --warn:#fbbf24;
-      --bad:#fb7185;
-      --shadow: 0 18px 60px rgba(0,0,0,.45);
-      --radius:18px;
+      --accent:#34d399;
+      --accent2:#7b3fa0;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --ok:#22c55e;
+      --shadow:0 18px 55px rgba(0,0,0,.45);
+      --r:18px;
+      --r2:14px;
     }
-
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:
-        radial-gradient(1100px 520px at 20% -10%, rgba(123,63,160,.24), transparent 60%),
-        radial-gradient(900px 520px at 90% 0%, rgba(52,211,153,.12), transparent 55%),
-        radial-gradient(700px 420px at 50% 110%, rgba(59,130,246,.10), transparent 55%),
-        var(--bg);
-      color:var(--text);
-      overflow-x:hidden;
+      background:radial-gradient(1200px 900px at 15% 0%, rgba(123,63,160,.22), transparent 50%),
+                 radial-gradient(1100px 800px at 90% 0%, rgba(52,211,153,.16), transparent 55%),
+                 linear-gradient(180deg, #070b15 0%, var(--bg) 100%);
+      color:var(--ink);
+      min-height:100vh;
     }
-
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:0 auto;padding:26px 18px 70px}
-
-    /* -------------------------------------------------------
-       Gate overlay (keep exactly)
-    ------------------------------------------------------- */
-    #gateOverlay{
-      position:fixed; inset:0; z-index:9999;
-      display:flex; align-items:center; justify-content:center;
-      padding:36px 16px;
-      background:
-        radial-gradient(circle at top, rgba(15,23,42,.95), rgba(2,6,23,.98) 55%, rgba(0,0,0,.98) 100%);
-      backdrop-filter:saturate(180%) blur(4px);
+    a{color:inherit}
+    .wrap{max-width:1180px;margin:0 auto;padding:26px 16px 42px}
+    header{
+      display:flex;gap:14px;align-items:flex-start;justify-content:space-between;
+      padding:18px 18px 16px;border:1px solid var(--line);border-radius:var(--r);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
     }
-    .gateCard{
-      width:min(520px, 94vw);
-      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.06));
-      border:1px solid rgba(148,163,184,.22);
-      border-radius:22px;
-      box-shadow: var(--shadow);
-      padding:22px 20px 18px;
+    header:before{
+      content:"";
+      position:absolute;inset:-1px;
+      background:radial-gradient(800px 260px at 25% 0%, rgba(52,211,153,.12), transparent 55%),
+                 radial-gradient(700px 240px at 80% 0%, rgba(123,63,160,.16), transparent 60%);
+      pointer-events:none;
     }
-    .gateTop{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin-bottom:10px;
-    }
-    .gateBadge{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:8px 12px;
-      border-radius:999px;
-      background:rgba(123,63,160,.12);
-      border:1px solid rgba(123,63,160,.25);
-      color:#e9d5ff;
-      font-weight:700;
-      letter-spacing:.2px;
-    }
-    .gateHint{
-      font-size:.92rem;
-      color:rgba(226,232,240,.78);
-      text-align:right;
-      line-height:1.25;
-    }
-    .gateTitle{
-      font-size:1.15rem;
-      margin:8px 0 6px;
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-    .gateSub{
-      margin:0 0 14px;
-      color:rgba(226,232,240,.78);
-      font-size:.98rem;
-      line-height:1.4;
-    }
-    .gateRow{
-      display:flex; gap:10px; align-items:center;
-    }
-    .gateInput{
-      flex:1;
-      padding:12px 12px;
-      border-radius:14px;
-      border:1px solid rgba(148,163,184,.28);
-      background:rgba(2,6,23,.45);
-      color:var(--text);
-      outline:none;
-      font-size:1rem;
-    }
-    .gateBtn{
-      padding:12px 14px;
-      border-radius:14px;
-      border:1px solid rgba(52,211,153,.30);
-      background:linear-gradient(135deg, rgba(52,211,153,.20), rgba(123,63,160,.12));
-      color:#dcfce7;
-      font-weight:800;
-      cursor:pointer;
+    header > *{position:relative;z-index:1}
+    .h-title{margin:0;font-size:1.25rem;letter-spacing:.2px}
+    .h-sub{margin:6px 0 0;color:var(--muted);max-width:58ch;line-height:1.35}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+      color:var(--ink);
+      font-size:.9rem;
       white-space:nowrap;
     }
-    .gateErr{
-      margin:10px 2px 0;
-      font-size:.92rem;
-      color:#fecaca;
-      display:none;
+    .pill b{font-weight:650}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(123,63,160,.12);
+      color:var(--ink);
+      font-size:.9rem;
     }
-
-    /* -------------------------------------------------------
-       Header / layout
-    ------------------------------------------------------- */
-    header{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:18px;
-      padding:10px 2px 18px;
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 3px rgba(52,211,153,.12);
+      flex:0 0 auto;
     }
-    .brand{
-      display:flex; align-items:center; gap:12px;
+    .toolbar{
+      display:flex;flex-wrap:wrap;gap:10px;
+      margin:14px 0 0;
     }
-    .logo{
-      width:46px;height:46px;border-radius:14px;
-      background:linear-gradient(135deg, rgba(123,63,160,.85), rgba(52,211,153,.65));
-      box-shadow:0 14px 40px rgba(123,63,160,.25);
+    .btn{
+      appearance:none;border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--ink);
+      padding:10px 12px;border-radius:14px;
+      cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;
+      font-weight:600;
+      transition:transform .08s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      pointer-events:auto;
     }
-    .brand h1{
-      margin:0;
-      font-size:1.35rem;
-      letter-spacing:.2px;
-      font-weight:900;
+    .btn:hover{background:rgba(255,255,255,.06);border-color:rgba(148,163,184,.28)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      border-color:rgba(52,211,153,.38);
+      background:linear-gradient(180deg, rgba(52,211,153,.18), rgba(52,211,153,.08));
     }
-    .brand p{
-      margin:2px 0 0;
-      color:rgba(226,232,240,.74);
-      font-size:.96rem;
-      line-height:1.25;
+    .btn.danger{
+      border-color:rgba(239,68,68,.35);
+      background:linear-gradient(180deg, rgba(239,68,68,.18), rgba(239,68,68,.08));
     }
-    .meta{
-      text-align:right;
-      color:rgba(226,232,240,.68);
-      font-size:.92rem;
-      line-height:1.2;
-    }
-    .meta strong{color:rgba(226,232,240,.92)}
-
+    .btn.small{padding:8px 10px;border-radius:12px;font-weight:650}
     .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap:18px;
-      margin-top:8px;
+      display:grid;gap:14px;margin-top:16px;
+      grid-template-columns:repeat(12,1fr);
     }
-    @media (max-width: 960px){
-      .grid{grid-template-columns:1fr}
-      .meta{text-align:left}
-    }
-
     .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
-      border:1px solid rgba(148,163,184,.16);
-      border-radius: var(--radius);
-      box-shadow: 0 18px 60px rgba(0,0,0,.25);
+      grid-column:span 12;
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.018));
+      box-shadow:var(--shadow);
       overflow:hidden;
     }
     .card .hd{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:14px 16px 12px;
-      background:linear-gradient(90deg, rgba(123,63,160,.12), rgba(52,211,153,.06));
-      border-bottom:1px solid rgba(148,163,184,.14);
+      padding:14px 16px;border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:rgba(0,0,0,.15);
     }
-    .card .hd h2{
-      margin:0;
-      font-size:1.05rem;
-      font-weight:900;
-      letter-spacing:.2px;
+    .card .hd h2{margin:0;font-size:1rem}
+    .card .bd{padding:14px 16px}
+    .kpis{
+      display:grid;gap:12px;margin-top:12px;
+      grid-template-columns:repeat(12,1fr);
     }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      font-weight:800;
-      font-size:.84rem;
-      color:#e2e8f0;
-      border:1px solid rgba(148,163,184,.18);
-      background:rgba(2,6,23,.35);
-      white-space:nowrap;
+    .kpi{
+      grid-column:span 12;
+      border:1px solid var(--line);
+      border-radius:var(--r2);
+      background:rgba(0,0,0,.16);
+      padding:12px 12px 11px;
     }
-    .dot{width:10px;height:10px;border-radius:50%}
-    .dot.ok{background:var(--mint); box-shadow:0 0 0 4px rgba(52,211,153,.12)}
-    .dot.ip{background:var(--warn); box-shadow:0 0 0 4px rgba(251,191,36,.12)}
-    .dot.bad{background:var(--bad); box-shadow:0 0 0 4px rgba(251,113,133,.14)}
-    .bd{padding:14px 16px 16px}
-
-    .small{
-      color:rgba(226,232,240,.72);
-      font-size:.95rem;
-      line-height:1.45;
-      margin:0;
+    .kpi .label{color:var(--muted);font-size:.85rem;margin:0 0 6px}
+    .kpi .value{margin:0;font-size:1.05rem;font-weight:700;line-height:1.2}
+    .kpi .sub{margin:6px 0 0;color:var(--muted);font-size:.9rem;line-height:1.35}
+    @media(min-width:860px){
+      .kpi{grid-column:span 4}
     }
-
-    /* -------------------------------------------------------
-       Buttons / inputs
-    ------------------------------------------------------- */
-    .btnRow{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:12px;
-    }
-    .btn{
-      display:inline-flex; align-items:center; justify-content:center; gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(148,163,184,.18);
-      background:rgba(2,6,23,.34);
-      color:rgba(226,232,240,.92);
-      font-weight:900;
-      cursor:pointer;
-      user-select:none;
-    }
-    .btn:hover{border-color: rgba(52,211,153,.28); transform: translateY(-1px)}
-    .btn{transition: all .18s ease}
-    .btn.primary{
-      border-color: rgba(52,211,153,.30);
-      background:linear-gradient(135deg, rgba(52,211,153,.20), rgba(123,63,160,.12));
-      color:#dcfce7;
-    }
-    .btn.danger{
-      border-color: rgba(251,113,133,.35);
-      background:linear-gradient(135deg, rgba(251,113,133,.16), rgba(123,63,160,.10));
-      color:#fee2e2;
-    }
-    .btn.tiny{
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:.86rem;
-    }
-    .btn:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .fieldGrid{
+    .tr{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.2fr 1fr 110px;
       gap:12px;
-      margin-top:12px;
+      padding:12px 12px;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(0,0,0,.16);
     }
-    @media (max-width: 720px){ .fieldGrid{grid-template-columns:1fr} }
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
+    .area{font-weight:750}
+    .status{color:var(--muted);font-weight:650}
+    .bar{
+      height:12px;border-radius:999px;
+      background:rgba(148,163,184,.12);
+      border:1px solid rgba(148,163,184,.14);
+      overflow:hidden;
     }
-    .label{
-      color:rgba(226,232,240,.70);
-      font-size:.82rem;
-      font-weight:900;
-      letter-spacing:.18px;
+    .bar > i{
+      display:block;height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(52,211,153,.75), rgba(123,63,160,.70));
     }
-    .input, .textarea, .select{
+    .ckpts{
+      margin:10px 0 0;
+      padding:0 0 0 18px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+    .ckpts li{margin:4px 0}
+    .foot{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+    }
+
+    /* Modal */
+    .overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.55);
+      backdrop-filter: blur(10px) saturate(140%);
+      display:none;
+      align-items:center;justify-content:center;
+      padding:26px 14px;
+      z-index:1000;
+      pointer-events:auto;
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(980px, 96vw);
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      box-shadow:0 28px 80px rgba(0,0,0,.6);
+      overflow:hidden;
+    }
+    .modal .mh{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+      padding:16px 16px;border-bottom:1px solid rgba(148,163,184,.18);
+      background:rgba(0,0,0,.18);
+    }
+    .modal .mh h3{margin:0;font-size:1.05rem}
+    .modal .mh p{margin:6px 0 0;color:var(--muted);max-width:72ch}
+    .x{
+      appearance:none;border:1px solid rgba(148,163,184,.22);
+      background:rgba(0,0,0,.25);
+      color:var(--ink);
+      width:40px;height:40px;border-radius:14px;
+      cursor:pointer;
+      font-size:18px;font-weight:800;
+    }
+    .x:hover{background:rgba(0,0,0,.35)}
+    .modal .mb{padding:16px}
+    .form{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media(min-width:860px){ .form.two{grid-template-columns:1fr 1fr} }
+    label{display:block;font-size:.85rem;color:var(--muted);margin:0 0 6px}
+    input, textarea, select{
       width:100%;
       padding:11px 12px;
       border-radius:14px;
-      border:1px solid rgba(148,163,184,.18);
-      background:rgba(2,6,23,.34);
-      color:rgba(226,232,240,.92);
+      border:1px solid rgba(148,163,184,.20);
+      background:rgba(0,0,0,.25);
+      color:var(--ink);
       outline:none;
-      font-size:.98rem;
     }
-    .textarea{min-height:90px; resize:vertical; line-height:1.35}
-    .help{
-      margin-top:10px;
-      color:rgba(226,232,240,.62);
-      font-size:.88rem;
-      line-height:1.35;
+    textarea{min-height:150px;resize:vertical;line-height:1.4}
+    input:focus, textarea:focus, select:focus{border-color:rgba(52,211,153,.45)}
+    .actions{
+      display:flex;gap:10px;flex-wrap:wrap;
+      justify-content:flex-end;
+      padding:14px 16px;
+      border-top:1px solid rgba(148,163,184,.18);
+      background:rgba(0,0,0,.14);
     }
-
-    /* -------------------------------------------------------
-       Progress table
-    ------------------------------------------------------- */
-    table{width:100%; border-collapse:separate; border-spacing:0 10px}
-    th{
-      text-align:left;
-      font-size:.82rem;
-      color:rgba(226,232,240,.70);
-      padding:0 10px 6px;
-      letter-spacing:.18px;
-      font-weight:800;
-    }
-    td{
-      padding:12px 10px;
-      background:rgba(2,6,23,.34);
-      border-top:1px solid rgba(148,163,184,.14);
-      border-bottom:1px solid rgba(148,163,184,.10);
-    }
-    tr td:first-child{
-      border-left:1px solid rgba(148,163,184,.12);
-      border-radius:14px 0 0 14px;
-    }
-    tr td:last-child{
-      border-right:1px solid rgba(148,163,184,.12);
-      border-radius:0 14px 14px 0;
-    }
-    .rowTitle{font-weight:900}
-    .rowSub{color:rgba(226,232,240,.66); font-size:.84rem; margin-top:2px}
-    .statusTag{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(148,163,184,.18);
-      background:rgba(2,6,23,.35);
-      font-weight:900;
-      font-size:.84rem;
-      white-space:nowrap;
-    }
-    .progress-shell{
-      height:10px;
-      border-radius:999px;
-      background:rgba(148,163,184,.14);
-      overflow:hidden;
-      border:1px solid rgba(148,163,184,.12);
-    }
-    .progress-bar{
-      height:100%;
-      width:0%;
-      border-radius:999px;
-      background:linear-gradient(90deg, rgba(52,211,153,.85), rgba(123,63,160,.75));
-      box-shadow:0 10px 26px rgba(123,63,160,.18);
-      transition:width .45s ease;
-    }
-    .progress-label{
-      text-align:right;
-      color:rgba(226,232,240,.72);
-      font-size:.82rem;
-      font-weight:900;
-      margin-top:6px;
-    }
-    .rowBtn{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .rowBtn .btn{
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:.84rem;
-    }
-
-    /* -------------------------------------------------------
-       Detail cards
-    ------------------------------------------------------- */
-    .section{
-      margin-top:16px;
-    }
-    .section h3{
-      margin:0 0 8px;
-      font-size:1rem;
-      font-weight:900;
-      letter-spacing:.2px;
-    }
-    .section p{margin:0;color:rgba(226,232,240,.74); line-height:1.45}
-    .checklist{
-      margin:10px 0 0;
-      padding:0;
-      list-style:none;
-      display:grid;
-      gap:9px;
-    }
-    .checklist li{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      padding:10px 10px;
-      border-radius:14px;
-      border:1px solid rgba(148,163,184,.14);
-      background:rgba(2,6,23,.30);
-      color:rgba(226,232,240,.84);
-    }
-    .check{
-      width:18px;height:18px; margin-top:1px;
-      border-radius:6px;
-      border:1px solid rgba(52,211,153,.35);
-      background:rgba(52,211,153,.14);
-      flex:0 0 auto;
-    }
-
-    /* -------------------------------------------------------
-       Modal
-    ------------------------------------------------------- */
-    .modal{
+    .toast{
       position:fixed;
-      inset:0;
-      z-index:9998;
+      right:12px;bottom:12px;
+      max-width:min(520px, calc(100vw - 24px));
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(2,6,23,.92);
+      color:var(--ink);
+      box-shadow:0 20px 60px rgba(0,0,0,.55);
       display:none;
-      align-items:center;
-      justify-content:center;
-      padding:24px 16px;
-      background:rgba(0,0,0,.62);
-      backdrop-filter: blur(6px);
+      z-index:2000;
     }
-    .modalCard{
-      width:min(860px, 96vw);
-      max-height:min(80vh, 880px);
-      overflow:auto;
-      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+    .toast.show{display:block}
+    .toast .t{font-weight:750}
+    .toast .m{margin-top:6px;color:var(--muted);line-height:1.35}
+
+    /* Passcode gate */
+    #gate{
+      position:fixed;inset:0;
+      z-index:3000;
+      display:flex;
+      align-items:center;justify-content:center;
+      padding:34px 14px;
+      background:radial-gradient(900px 600px at 20% 0%, rgba(123,63,160,.25), transparent 58%),
+                 radial-gradient(900px 600px at 85% 0%, rgba(52,211,153,.18), transparent 60%),
+                 rgba(2,6,23,.92);
+      backdrop-filter: blur(12px) saturate(160%);
+      pointer-events:auto;
+    }
+    .gate-card{
+      width:min(560px, 96vw);
       border:1px solid rgba(148,163,184,.22);
       border-radius:22px;
-      box-shadow: var(--shadow);
-      padding:16px 16px 14px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow:0 30px 90px rgba(0,0,0,.65);
+      overflow:hidden;
     }
-    .modalHd{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      padding:6px 4px 12px;
-      border-bottom:1px solid rgba(148,163,184,.16);
-      margin-bottom:12px;
-    }
-    .modalHd h3{
-      margin:0;
-      font-size:1.05rem;
-      font-weight:900;
-      letter-spacing:.2px;
-    }
-    .closeX{
-      width:40px;height:40px;
-      border-radius:14px;
-      border:1px solid rgba(148,163,184,.22);
-      background:rgba(2,6,23,.32);
-      color:rgba(226,232,240,.9);
-      font-weight:900;
-      cursor:pointer;
-    }
-
-    footer{
-      margin-top:20px;
-      color:rgba(226,232,240,.55);
-      font-size:.86rem;
-      text-align:center;
-    }
+    .gate-card .top{padding:16px 16px;border-bottom:1px solid rgba(148,163,184,.18)}
+    .gate-card h2{margin:0;font-size:1.1rem}
+    .gate-card p{margin:8px 0 0;color:var(--muted);line-height:1.4}
+    .gate-card .mid{padding:16px}
+    .gate-row{display:flex;gap:10px;align-items:center}
+    .gate-row input{flex:1}
+    .err{margin-top:10px;color:#fecaca;display:none}
+    .err.show{display:block}
+    .hint{margin-top:12px;color:var(--muted);font-size:.9rem}
   </style>
 </head>
 
 <body>
-  <!-- Gate overlay -->
-  <div id="gateOverlay">
-    <div class="gateCard" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
-      <div class="gateTop">
-        <div class="gateBadge">
-          <span>🔒</span>
-          <span>TradeProBuddy Dashboard</span>
-        </div>
-        <div class="gateHint">
-          Protected view<br><strong>Enter passcode</strong>
-        </div>
+  <div id="gate" aria-modal="true" role="dialog">
+    <div class="gate-card">
+      <div class="top">
+        <h2>TradeProBuddy Dashboard</h2>
+        <p><span class="dot"></span> Protected view</p>
       </div>
-      <div id="gateTitle" class="gateTitle">Access Required</div>
-      <p class="gateSub">This dashboard is private. Enter the passcode to view progress, links, and current status.</p>
-      <div class="gateRow">
-        <input id="gateInput" class="gateInput" type="password" placeholder="Passcode…" autocomplete="current-password" />
-        <button id="gateBtn" class="gateBtn">Unlock</button>
+      <div class="mid">
+        <label for="gateCode">Enter passcode</label>
+        <div class="gate-row">
+          <input id="gateCode" type="password" autocomplete="current-password" placeholder="Passcode" />
+          <button id="gateBtn" class="btn primary" type="button">Unlock</button>
+        </div>
+        <div id="gateErr" class="err">Incorrect passcode. Try again.</div>
+        <div class="hint">Tip: this is only front-end protection. For real security, keep the repo private or serve behind auth.</div>
       </div>
-      <div id="gateErr" class="gateErr">Incorrect passcode. Try again.</div>
     </div>
   </div>
 
-  <div class="wrap" id="app" style="display:none;">
+  <div class="wrap" id="app">
     <header>
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>TradeProBuddy™ Project Dashboard</h1>
-          <p>Live view + editable data (saved to your browser, exportable as status.json).</p>
+      <div>
+        <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
+        <p class="h-sub">Live view + editable data (saved to your browser, exportable as <code>status.json</code>).</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
+          <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
+          <span class="pill"><b>Updated:</b> <span id="updatedAt">-</span></span>
         </div>
       </div>
-      <div class="meta">
-        <div><strong>Owner:</strong> Emile (BrainIT Consulting)</div>
-        <div><strong>Updated:</strong> <span id="updatedDate">—</span></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+        <span class="badge"><span class="dot"></span><span id="overallBadge">-</span></span>
+        <button class="btn small" type="button" id="btnAbout">How this works</button>
       </div>
     </header>
 
+    <div class="toolbar" aria-label="Dashboard actions">
+      <button class="btn primary" type="button" id="btnEditOverall">Edit Overall</button>
+      <button class="btn" type="button" id="btnEditBranch">Edit a Branch</button>
+      <button class="btn" type="button" id="btnImport">Import JSON</button>
+      <button class="btn" type="button" id="btnExport">Export status.json</button>
+      <button class="btn" type="button" id="btnLoadRemote">Load Remote</button>
+      <button class="btn danger" type="button" id="btnResetLocal">Reset Local</button>
+    </div>
+
+    <div class="foot" id="howItWorks" style="display:none">
+      <b>How this works:</b> edits save to <code>localStorage</code> in your browser (private to your device). Use <b>Export</b> to download a <code>status.json</code> you can publish from n8n/GitHub. Use <b>Load Remote</b> to pull <code>./status.json</code> from this site.
+    </div>
+
     <div class="grid">
-      <!-- Left: Overall -->
-      <div class="card">
+      <section class="card" aria-labelledby="overallTitle">
         <div class="hd">
-          <h2>Overall Status</h2>
-          <div class="pill">
-            <span class="dot ip" id="overallDot"></span>
-            <span id="overallBadgeText">In Progress</span>
-          </div>
+          <h2 id="overallTitle">Overall Status</h2>
+          <span class="pill" id="overallSummaryPill" style="display:none"></span>
         </div>
         <div class="bd">
-          <p class="small" id="overallHeadline" style="font-weight:900;margin-bottom:6px;">—</p>
-          <p class="small" id="overallNotes">—</p>
-
-          <div class="btnRow">
-            <button class="btn primary" id="btnEditOverall" type="button">✏️ Edit Overall</button>
-            <button class="btn" id="btnEditBranch" type="button">🧩 Edit a Branch</button>
-            <button class="btn" id="btnImport" type="button">⬇️ Import JSON</button>
-            <button class="btn" id="btnExport" type="button">⬆️ Export status.json</button>
-            <button class="btn" id="btnRefreshRemote" type="button" title="Loads status.json next to this page. Override with ?statusUrl=https://.../status.json">🔄 Load Remote</button>
-            <button class="btn danger" id="btnResetLocal" type="button" title="Clears local saved edits and reloads the default data">🧹 Reset Local</button>
-          </div>
-
-          <div class="help">
-            <strong>How this works:</strong> edits save to <code>localStorage</code> in your browser (private to your device).
-            Use <strong>Export</strong> to download a <code>status.json</code> you can publish from n8n/GitHub.
+          <div class="kpis">
+            <div class="kpi">
+              <p class="label">Headline</p>
+              <p class="value" id="overallHeadline">-</p>
+            </div>
+            <div class="kpi">
+              <p class="label">Notes</p>
+              <p class="value" style="font-size:1rem;font-weight:650" id="overallNotes">-</p>
+            </div>
+            <div class="kpi">
+              <p class="label">Rolling Forward</p>
+              <p class="value" id="overallBadge2">-</p>
+              <p class="sub" id="overallSummary">-</p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Right: Progress -->
-      <div class="card">
+      <section class="card" aria-labelledby="branchesTitle">
         <div class="hd">
-          <h2>Progress by Branch</h2>
-          <div class="pill">
-            <span class="dot ip" id="branchSummaryDot"></span>
-            <span id="branchSummaryText">Rolling Forward</span>
-          </div>
+          <h2 id="branchesTitle">Progress by Branch</h2>
+          <span class="pill" id="localModePill">Mode: <b>Local</b></span>
         </div>
-        <div class="bd">
-          <table aria-label="Project progress table">
-            <thead>
-              <tr>
-                <th>Area</th>
-                <th>Status</th>
-                <th style="width:46%;">Progress</th>
-              </tr>
-            </thead>
-            <tbody id="progressTbody"></tbody>
-          </table>
-        </div>
-      </div>
+        <div class="bd" id="branches"></div>
+      </section>
     </div>
 
-    <!-- Detail sections -->
-    <div class="grid" style="margin-top:18px;">
-      <div class="card section" id="detailLeft">
-        <div class="hd">
-          <h2 id="detailTitleLeft">n8n Workflows</h2>
-          <div class="pill"><span class="dot ip" id="detailDotLeft"></span><span id="detailStatusLeft">—</span></div>
-        </div>
-        <div class="bd">
-          <p class="small" id="detailDescLeft">—</p>
-          <div class="section">
-            <h3>Current Checkpoints</h3>
-            <ul class="checklist" id="detailChecklistLeft"></ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="card section" id="detailRight">
-        <div class="hd">
-          <h2 id="detailTitleRight">Forms &amp; Apps</h2>
-          <div class="pill"><span class="dot ip" id="detailDotRight"></span><span id="detailStatusRight">—</span></div>
-        </div>
-        <div class="bd">
-          <p class="small" id="detailDescRight">—</p>
-          <div class="section">
-            <h3>Current Checkpoints</h3>
-            <ul class="checklist" id="detailChecklistRight"></ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid" style="margin-top:18px;">
-      <div class="card section" id="detailLowerLeft">
-        <div class="hd">
-          <h2 id="detailTitleLowerLeft">Reports</h2>
-          <div class="pill"><span class="dot ip" id="detailDotLowerLeft"></span><span id="detailStatusLowerLeft">—</span></div>
-        </div>
-        <div class="bd">
-          <p class="small" id="detailDescLowerLeft">—</p>
-          <div class="section">
-            <h3>Current Checkpoints</h3>
-            <ul class="checklist" id="detailChecklistLowerLeft"></ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="card section" id="detailLowerRight">
-        <div class="hd">
-          <h2 id="detailTitleLowerRight">Website</h2>
-          <div class="pill"><span class="dot ip" id="detailDotLowerRight"></span><span id="detailStatusLowerRight">—</span></div>
-        </div>
-        <div class="bd">
-          <p class="small" id="detailDescLowerRight">—</p>
-          <div class="section">
-            <h3>Current Checkpoints</h3>
-            <ul class="checklist" id="detailChecklistLowerRight"></ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card section" id="detailArchitecture" style="margin-top:18px;">
-      <div class="hd">
-        <h2 id="detailTitleArch">Architecture</h2>
-        <div class="pill"><span class="dot ip" id="detailDotArch"></span><span id="detailStatusArch">—</span></div>
-      </div>
-      <div class="bd">
-        <p class="small" id="detailDescArch">—</p>
-
-        <div class="section">
-          <h3>Current Checkpoints</h3>
-          <ul class="checklist" id="detailChecklistArch"></ul>
-        </div>
-      </div>
-    </div>
-
-    
-    <div id="toast" style="
-      position:fixed;
-      left:50%;
-      bottom:22px;
-      transform:translateX(-50%);
-      z-index:9997;
-      display:none;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(148,163,184,.22);
-      background:rgba(2,6,23,.78);
-      color:rgba(226,232,240,.92);
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
-      max-width:min(720px, 92vw);
-      font-weight:800;
-      font-size:.92rem;
-    "></div>
-
-<footer>
-      © 2025 BrainIT Consulting • TradeProBuddy™ Internal Dashboard
-    </footer>
+    <div class="foot">© 2025 BrainIT Consulting • TradeProBuddy™ Internal Dashboard</div>
   </div>
 
-  <!-- Modal: Overall editor -->
-  <div class="modal" id="modalOverall" aria-hidden="true">
-    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalOverallTitle">
-      <div class="modalHd">
+  <!-- MODALS -->
+  <div class="overlay" id="ovOverall" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
         <div>
-          <h3 id="modalOverallTitle">Edit Overall</h3>
-          <div class="help" style="margin:6px 0 0;">Saves locally. Export to publish.</div>
+          <h3>Edit Overall</h3>
+          <p>Saves locally. Export to publish.</p>
         </div>
-        <button class="closeX" data-close="modalOverall" aria-label="Close" type="button">✕</button>
+        <button class="x" type="button" data-close="ovOverall">x</button>
       </div>
-
-      <div class="fieldGrid">
-        <div class="field">
-          <div class="label">Badge</div>
-          <input class="input" id="overallBadgeInput" placeholder="e.g. In Progress..." />
-        </div>
-        <div class="field">
-          <div class="label">Updated At (ISO)</div>
-          <input class="input" id="overallUpdatedAtInput" placeholder="2025-12-13T01:34:09.680Z" />
-        </div>
-        <div class="field" style="grid-column: 1 / -1;">
-          <div class="label">Headline</div>
-          <input class="input" id="overallHeadlineInput" placeholder="..." />
-        </div>
-        <div class="field" style="grid-column: 1 / -1;">
-          <div class="label">Notes</div>
-          <textarea class="textarea" id="overallNotesInput" placeholder="..."></textarea>
-        </div>
-        <div class="field" style="grid-column: 1 / -1;">
-          <div class="label">Optional Summary (right-card pill)</div>
-          <input class="input" id="overallSummaryInput" placeholder="Rolling Forward / etc" />
+      <div class="mb">
+        <div class="form two">
+          <div>
+            <label for="oBadge">Badge</label>
+            <input id="oBadge" />
+          </div>
+          <div>
+            <label for="oUpdatedAt">Updated At (ISO)</label>
+            <input id="oUpdatedAt" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="oHeadline">Headline</label>
+            <input id="oHeadline" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="oNotes">Notes</label>
+            <textarea id="oNotes"></textarea>
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="oSummary">Optional Summary (right-card pill)</label>
+            <input id="oSummary" />
+          </div>
         </div>
       </div>
-
-      <div class="btnRow" style="margin-top:14px;">
-        <button class="btn primary" id="overallSaveBtn" type="button">💾 Save</button>
-        <button class="btn" data-close="modalOverall" type="button">Cancel</button>
+      <div class="actions">
+        <button class="btn primary" type="button" id="saveOverall">Save</button>
+        <button class="btn" type="button" data-close="ovOverall">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Branch editor -->
-  <div class="modal" id="modalBranch" aria-hidden="true">
-    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalBranchTitle">
-      <div class="modalHd">
+  <div class="overlay" id="ovBranch" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
         <div>
-          <h3 id="modalBranchTitle">Edit Branch</h3>
-          <div class="help" style="margin:6px 0 0;">Edit status / progress / checkpoints. Use one item per line.</div>
+          <h3>Edit Branch</h3>
+          <p>Edit status / progress / checkpoints. Use one item per line.</p>
         </div>
-        <button class="closeX" data-close="modalBranch" aria-label="Close" type="button">✕</button>
+        <button class="x" type="button" data-close="ovBranch">x</button>
       </div>
-
-      <div class="fieldGrid">
-        <div class="field">
-          <div class="label">Branch</div>
-          <select class="select" id="branchKeySelect"></select>
-        </div>
-        <div class="field">
-          <div class="label">Status</div>
-          <input class="input" id="branchStatusInput" placeholder="In Progress / Active / Planned" />
-        </div>
-        <div class="field">
-          <div class="label">Progress (0–100)</div>
-          <input class="input" id="branchProgressInput" type="number" min="0" max="100" step="1" />
-        </div>
-        <div class="field" style="grid-column: 1 / -1;">
-          <div class="label">Checkpoints (one per line)</div>
-          <textarea class="textarea" id="branchCheckpointsInput" placeholder="..."></textarea>
+      <div class="mb">
+        <div class="form two">
+          <div>
+            <label for="bKey">Branch</label>
+            <select id="bKey"></select>
+          </div>
+          <div>
+            <label for="bStatus">Status</label>
+            <select id="bStatus">
+              <option>Planned</option>
+              <option>In Progress</option>
+              <option>Active</option>
+              <option>Paused</option>
+              <option>In Development</option>
+              <option>Blocked</option>
+              <option>Done</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="bProgress">Progress (0-100)</label>
+            <input id="bProgress" type="number" min="0" max="100" step="1" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="bCkpts">Checkpoints (one per line)</label>
+            <textarea id="bCkpts"></textarea>
+          </div>
         </div>
       </div>
-
-      <div class="btnRow" style="margin-top:14px;">
-        <button class="btn primary" id="branchSaveBtn" type="button">💾 Save</button>
-        <button class="btn" data-close="modalBranch" type="button">Cancel</button>
+      <div class="actions">
+        <button class="btn primary" type="button" id="saveBranch">Save</button>
+        <button class="btn" type="button" data-close="ovBranch">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Import -->
-  <div class="modal" id="modalImport" aria-hidden="true">
-    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalImportTitle">
-      <div class="modalHd">
+  <div class="overlay" id="ovImport" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
         <div>
-          <h3 id="modalImportTitle">Import JSON</h3>
-          <div class="help" style="margin:6px 0 0;">Paste a status.json object here. We’ll validate lightly and apply it.</div>
+          <h3>Import JSON</h3>
+          <p>Paste a status.json object here.</p>
         </div>
-        <button class="closeX" data-close="modalImport" aria-label="Close" type="button">✕</button>
+        <button class="x" type="button" data-close="ovImport">x</button>
       </div>
-
-      <div class="field">
-        <div class="label">JSON</div>
-        <textarea class="textarea" id="importTextarea" style="min-height:220px;" placeholder='{ "updatedAt": "...", "overall": {...}, "branches": {...} }'></textarea>
+      <div class="mb">
+        <label for="importJson">JSON</label>
+        <textarea id="importJson" spellcheck="false"></textarea>
       </div>
-
-      <div class="btnRow" style="margin-top:14px;">
-        <button class="btn primary" id="importApplyBtn" type="button">✅ Apply + Save Local</button>
-        <button class="btn" data-close="modalImport" type="button">Cancel</button>
+      <div class="actions">
+        <button class="btn primary" type="button" id="applyImport">Apply + Save Local</button>
+        <button class="btn" type="button" data-close="ovImport">Cancel</button>
       </div>
-
-      <div class="help" id="importErr" style="color:#fecaca; display:none; margin-top:10px;"></div>
     </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="t" id="toastTitle">-</div>
+    <div class="m" id="toastMsg">-</div>
   </div>
 
   <script>
-  // =========================================================
-  // Default data (from your message)
-  // =========================================================
-  const DEFAULT_STATUS = {
-    "updatedAt": "2025-12-13T01:34:09.680Z",
-    "overall": {
-      "badge": "In Progress - Testing n8n workflows & JSON controller",
-      "headline": "Dashboard is now wired for auto updates.",
-      "notes": "Next: connect n8n to publish status.json automatically."
-    },
-    "branches": {
-      "n8n": {
-        "status": "In Progress",
-        "progress": 82,
-        "checkpoints": [
-          "Global router to subflows handoff confirmed",
-          "Electrical branch end-to-end test run succeeded",
-          "Email hardening added to prevent empty addresses from failing runs",
-          "Contractor Profiles HTML Report (V7) wired and branded",
-          "Multi-trade contractor records live in DB"
-        ]
-      },
-      "forms": {
-        "status": "In Progress",
-        "progress": 75,
-        "checkpoints": [
-          "Roofer survey form V1.6.x integrated with core n8n workflow",
-          "Electrician form fields drafted (USA-only) and mapped to the Electrical subflow",
-          "Plumber form branch created; email field hardening in progress",
-          "App embed plus demo pages working for Trade Pros entry points"
-        ]
-      },
-      "reports": {
-        "status": "Active",
-        "progress": 85,
-        "checkpoints": [
-          "Contractor Homeowner Adjuster HTML outputs implemented for roofing",
-          "Electrical estimate drafts polished by Style Expert and emailed end-to-end",
-          "Sortable Contractor Profiles HTML Report (V7) live for internal use",
-          "Status plus progress dashboard live (this page)"
-        ]
-      },
-      "website": {
-        "status": "In Progress",
-        "progress": 95,
-        "checkpoints": [
-          "Trade Pros landing routes to Roofing Electrical Plumbing demos",
-          "Roofers demo page baseline preserved (gate plus app plus report modal)",
-          "Electrical demo page live and sending emails successfully",
-          "Copy updates: roofer-friendly messaging plus disclaimers"
-        ]
-      },
-      "architecture": {
-        "status": "Planned",
-        "progress": 50,
-        "checkpoints": [
-          "Pre-Gmail guard node (validate recipients, log and continue)",
-          "Shared Send Safe Email subflow reused by all trades",
-          "Per Form: validate Thank You pages and autoresponder emails",
-          "Centralized email normalization (To CC BCC Reply-To)"
-        ]
-      }
-    }
-  };
+    const STORAGE_KEY = "tpb_status_v1";
+    const MODE_KEY = "tpb_mode_v1";
+    const PASS_KEY = "tpb_gate_ok_v1";
 
-  // =========================================================
-  // State (localStorage-backed)
-  // =========================================================
-  const LS_KEY = "tpb_dash_data_v1";
-  let state = null;
+    // IMPORTANT: change this to your own passcode
+    const PASSCODE = "tradepro";
 
-  function safeJsonParse(str){
-    try{ return JSON.parse(str); }catch(e){ return null; }
-  }
-
-  function loadState(){
-    const raw = (() => { try { return localStorage.getItem(LS_KEY); } catch(e){ return null; } })();
-    const parsed = raw ? safeJsonParse(raw) : null;
-    state = normalizeStatus(parsed || DEFAULT_STATUS);
-  }
-
-  function saveState(){
-    if(!state.updatedAt || isNaN(Date.parse(state.updatedAt))){
-      state.updatedAt = new Date().toISOString();
-    }
-    try{ localStorage.setItem(LS_KEY, JSON.stringify(state, null, 2)); }catch(e){}
-  }
-
-  function resetLocal(){
-    try{ localStorage.removeItem(LS_KEY); }catch(e){}
-    state = normalizeStatus(DEFAULT_STATUS);
-    renderAll();
-  }
-
-  function normalizeStatus(s){
-    const out = {
-      updatedAt: (s && typeof s.updatedAt === "string") ? s.updatedAt : new Date().toISOString(),
+    const DEFAULT_DATA = {
+      updatedAt: new Date().toISOString(),
       overall: {
-        badge: s?.overall?.badge ?? "In Progress",
-        headline: s?.overall?.headline ?? "",
-        notes: s?.overall?.notes ?? "",
-        summary: s?.overall?.summary ?? s?.overall?.kpiSummary ?? ""
+        badge: "In Progress",
+        headline: "Dashboard is now wired for auto updates.",
+        notes: "Next: connect n8n to publish status.json automatically.",
+        summary: ""
       },
-      branches: {}
+      branches: {
+        n8n: { status: "In Progress", progress: 82, checkpoints: [] },
+        forms: { status: "In Progress", progress: 75, checkpoints: [] },
+        reports: { status: "Active", progress: 85, checkpoints: [] },
+        website: { status: "In Progress", progress: 95, checkpoints: [] },
+        architecture: { status: "Planned", progress: 50, checkpoints: [] }
+      }
     };
 
-    const defaultBranches = ["n8n","forms","reports","website","architecture"];
-    const srcBranches = s?.branches && typeof s.branches === "object" ? s.branches : {};
-    for(const k of defaultBranches){
-      const b = srcBranches[k] || {};
-      out.branches[k] = {
-        status: b.status ?? "In Progress",
-        progress: clampInt(b.progress ?? 0, 0, 100),
-        checkpoints: Array.isArray(b.checkpoints) ? b.checkpoints.filter(Boolean).map(String) : []
-      };
-    }
-    return out;
-  }
+    const $ = (id) => document.getElementById(id);
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const safeJSON = (s) => { try { return { ok:true, val: JSON.parse(s) }; } catch(e){ return { ok:false, err:e }; } };
 
-  function clampInt(v, min, max){
-    const n = Number(v);
-    if(!Number.isFinite(n)) return min;
-    return Math.max(min, Math.min(max, Math.round(n)));
-  }
-
-  // =========================================================
-  // UI helpers
-  // =========================================================
-  function dotClassForStatus(text){
-    const s = String(text || "").toLowerCase();
-    if(s.includes("active") || s.includes("done") || s.includes("success")) return "ok";
-    if(s.includes("blocked") || s.includes("fail") || s.includes("error")) return "bad";
-    return "ip";
-  }
-
-  function setDot(el, statusText){
-    if(!el) return;
-    el.classList.remove("ok","ip","bad");
-    el.classList.add(dotClassForStatus(statusText));
-  }
-
-  function formatUpdated(iso){
-    try{
-      const d = new Date(iso);
-      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-    }catch(e){
-      return String(iso || "");
-    }
-  }
-
-  function downloadText(filename, text){
-    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  // =========================================================
-  // Render
-  // =========================================================
-  const BRANCH_META = {
-    n8n:          { title:"n8n",           sub:"Routing + subflows + JSON controller" , desc:"Root router dispatches to trade-specific subflows. Each trade handles estimate generation + polish + messaging."},
-    forms:        { title:"Forms & Apps",  sub:"Survey capture + app embeds"          , desc:"Survey-style forms/apps capture job details. Data posts to the root workflow, which routes to the correct trade subflow."},
-    reports:      { title:"Reports",       sub:"HTML outputs + internal views"        , desc:"Customer-facing drafts and internal tables. Focus: fast, readable, branded outputs."},
-    website:      { title:"Website",       sub:"Landing + demo routes"                , desc:"Demo pages live under BrainIT Consulting, with password-gated previews and embedded apps."},
-    architecture: { title:"Architecture",  sub:"Conventions + reuse plan"             , desc:"Keep it modular: root router → subflows per trade. Reuse common blocks (email, normalization, logging) as shared subflows."},
-  };
-
-  function renderAll(){
-    document.getElementById("updatedDate").textContent = formatUpdated(state.updatedAt);
-
-    document.getElementById("overallBadgeText").textContent = state.overall.badge || "";
-    document.getElementById("overallHeadline").textContent = state.overall.headline || "";
-    document.getElementById("overallNotes").textContent = state.overall.notes || "";
-    setDot(document.getElementById("overallDot"), state.overall.badge);
-
-    const summary = state.overall.summary || state.overall.badge || "Rolling Forward";
-    document.getElementById("branchSummaryText").textContent = summary;
-    setDot(document.getElementById("branchSummaryDot"), summary);
-
-    const tbody = document.getElementById("progressTbody");
-    tbody.innerHTML = "";
-    for(const key of Object.keys(BRANCH_META)){
-      const meta = BRANCH_META[key];
-      const b = state.branches[key];
-
-      const tr = document.createElement("tr");
-      tr.setAttribute("data-branch-row", key);
-
-      const td1 = document.createElement("td");
-      td1.innerHTML = `<div class="rowTitle">${meta.title}</div><div class="rowSub">${meta.sub}</div>`;
-
-      const td2 = document.createElement("td");
-      const statusTag = document.createElement("span");
-      statusTag.className = "statusTag";
-      const dot = document.createElement("span");
-      dot.className = "dot " + dotClassForStatus(b.status);
-      statusTag.appendChild(dot);
-      statusTag.appendChild(document.createTextNode(" " + (b.status || "")));
-      td2.appendChild(statusTag);
-
-      const td3 = document.createElement("td");
-      const shell = document.createElement("div");
-      shell.className = "progress-shell";
-      const fill = document.createElement("div");
-      fill.className = "progress-bar";
-      fill.style.width = (clampInt(b.progress,0,100)) + "%";
-      shell.appendChild(fill);
-
-      const label = document.createElement("div");
-      label.className = "progress-label";
-      label.textContent = clampInt(b.progress,0,100) + "%";
-
-      const rowBtns = document.createElement("div");
-      rowBtns.className = "rowBtn";
-      rowBtns.style.marginTop = "10px";
-      const editBtn = document.createElement("button");
-      editBtn.className = "btn tiny";
-      editBtn.type = "button";
-      editBtn.textContent = "Edit";
-      editBtn.addEventListener("click", () => openBranchModal(key));
-      rowBtns.appendChild(editBtn);
-
-      td3.appendChild(shell);
-      td3.appendChild(label);
-      td3.appendChild(rowBtns);
-
-      tr.appendChild(td1);
-      tr.appendChild(td2);
-      tr.appendChild(td3);
-      tbody.appendChild(tr);
+    function toast(title, msg){
+      $("toastTitle").textContent = title;
+      $("toastMsg").textContent = msg;
+      const t = $("toast");
+      t.classList.add("show");
+      clearTimeout(window.__tpb_toast_t);
+      window.__tpb_toast_t = setTimeout(()=>t.classList.remove("show"), 3200);
     }
 
-    renderDetailCard("Left", "n8n");
-    renderDetailCard("Right", "forms");
-    renderDetailCard("LowerLeft", "reports");
-    renderDetailCard("LowerRight", "website");
-    renderDetailCard("Arch", "architecture", true);
-  }
+    function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
 
-  function renderDetailCard(slot, branchKey, isArch=false){
-    const meta = BRANCH_META[branchKey];
-    const b = state.branches[branchKey];
-
-    const titleEl = document.getElementById(isArch ? "detailTitleArch" : `detailTitle${slot}`);
-    const dotEl   = document.getElementById(isArch ? "detailDotArch" : `detailDot${slot}`);
-    const statEl  = document.getElementById(isArch ? "detailStatusArch" : `detailStatus${slot}`);
-    const descEl  = document.getElementById(isArch ? "detailDescArch" : `detailDesc${slot}`);
-    const listEl  = document.getElementById(isArch ? "detailChecklistArch" : `detailChecklist${slot}`);
-
-    if(titleEl) titleEl.textContent = meta.title;
-    if(statEl) statEl.textContent = b.status || "";
-    if(dotEl) setDot(dotEl, b.status);
-    if(descEl) descEl.textContent = meta.desc;
-
-    if(listEl){
-      listEl.innerHTML = "";
-      for(const item of (b.checkpoints || [])){
-        const li = document.createElement("li");
-        li.innerHTML = `<span class="check" aria-hidden="true"></span><div>${escapeHtml(String(item))}</div>`;
-        listEl.appendChild(li);
+    function normalizeData(raw){
+      const data = deepClone(DEFAULT_DATA);
+      if(raw && typeof raw === "object"){
+        if(typeof raw.updatedAt === "string") data.updatedAt = raw.updatedAt;
+        if(raw.overall && typeof raw.overall === "object"){
+          if(typeof raw.overall.badge === "string") data.overall.badge = raw.overall.badge;
+          if(typeof raw.overall.headline === "string") data.overall.headline = raw.overall.headline;
+          if(typeof raw.overall.notes === "string") data.overall.notes = raw.overall.notes;
+          if(typeof raw.overall.summary === "string") data.overall.summary = raw.overall.summary;
+        }
+        if(raw.branches && typeof raw.branches === "object"){
+          for(const k of Object.keys(data.branches)){
+            const b = raw.branches[k];
+            if(b && typeof b === "object"){
+              if(typeof b.status === "string") data.branches[k].status = b.status;
+              if(typeof b.progress === "number") data.branches[k].progress = clamp(Math.round(b.progress), 0, 100);
+              if(Array.isArray(b.checkpoints)) data.branches[k].checkpoints = b.checkpoints.map(x => String(x)).filter(Boolean);
+            }
+          }
+        }
       }
-    }
-  }
-
-  function escapeHtml(s){
-    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-
-
-  function showToast(text, ms=2600){
-    const el = document.getElementById("toast");
-    if(!el) return;
-    el.textContent = text;
-    el.style.display = "block";
-    clearTimeout(el.__t);
-    el.__t = setTimeout(()=>{ el.style.display="none"; }, ms);
-  }
-
-  // =========================================================
-  // Modals
-  // =========================================================
-  function openModal(id){
-    const m = document.getElementById(id);
-    if(!m) return;
-    m.style.display = "flex";
-    m.setAttribute("aria-hidden","false");
-  }
-  function closeModal(id){
-    const m = document.getElementById(id);
-    if(!m) return;
-    m.style.display = "none";
-    m.setAttribute("aria-hidden","true");
-  }
-
-  document.addEventListener("click", (e) => {
-    const t = e.target;
-    if(t && t.getAttribute && t.getAttribute("data-close")){
-      closeModal(t.getAttribute("data-close"));
-    }
-    if(t && t.classList && t.classList.contains("modal")){
-      t.style.display = "none";
-      t.setAttribute("aria-hidden","true");
-    }
-  });
-
-  function openOverallModal(){
-    document.getElementById("overallBadgeInput").value = state.overall.badge || "";
-    document.getElementById("overallHeadlineInput").value = state.overall.headline || "";
-    document.getElementById("overallNotesInput").value = state.overall.notes || "";
-    document.getElementById("overallSummaryInput").value = state.overall.summary || "";
-    document.getElementById("overallUpdatedAtInput").value = state.updatedAt || "";
-    openModal("modalOverall");
-  }
-
-  function saveOverallFromModal(){
-    state.overall.badge = String(document.getElementById("overallBadgeInput").value || "").trim();
-    state.overall.headline = String(document.getElementById("overallHeadlineInput").value || "").trim();
-    state.overall.notes = String(document.getElementById("overallNotesInput").value || "").trim();
-    state.overall.summary = String(document.getElementById("overallSummaryInput").value || "").trim();
-
-    const updatedAt = String(document.getElementById("overallUpdatedAtInput").value || "").trim();
-    state.updatedAt = updatedAt || new Date().toISOString();
-    if(isNaN(Date.parse(state.updatedAt))) state.updatedAt = new Date().toISOString();
-
-    saveState();
-    renderAll();
-    closeModal("modalOverall");
-  }
-
-  function fillBranchSelect(){
-    const sel = document.getElementById("branchKeySelect");
-    sel.innerHTML = "";
-    for(const key of Object.keys(BRANCH_META)){
-      const opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = BRANCH_META[key].title;
-      sel.appendChild(opt);
-    }
-  }
-
-  function openBranchModal(branchKey){
-    fillBranchSelect();
-    const sel = document.getElementById("branchKeySelect");
-    sel.value = branchKey || "n8n";
-    setBranchModalFields(sel.value);
-    openModal("modalBranch");
-  }
-
-  function setBranchModalFields(branchKey){
-    const b = state.branches[branchKey];
-    document.getElementById("branchStatusInput").value = b.status || "";
-    document.getElementById("branchProgressInput").value = clampInt(b.progress, 0, 100);
-    document.getElementById("branchCheckpointsInput").value = (b.checkpoints || []).join("\n");
-  }
-
-  function saveBranchFromModal(){
-    const key = document.getElementById("branchKeySelect").value;
-    const statusText = String(document.getElementById("branchStatusInput").value || "").trim();
-    const progress = clampInt(document.getElementById("branchProgressInput").value, 0, 100);
-    const lines = String(document.getElementById("branchCheckpointsInput").value || "")
-      .split("\n")
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    state.branches[key].status = statusText || state.branches[key].status;
-    state.branches[key].progress = progress;
-    state.branches[key].checkpoints = lines;
-
-    state.updatedAt = new Date().toISOString();
-
-    saveState();
-    renderAll();
-    closeModal("modalBranch");
-  }
-
-  function openImportModal(){
-    document.getElementById("importTextarea").value = "";
-    const errEl = document.getElementById("importErr");
-    errEl.style.display = "none";
-    errEl.textContent = "";
-    openModal("modalImport");
-  }
-
-  function applyImport(){
-    const errEl = document.getElementById("importErr");
-    const txt = document.getElementById("importTextarea").value || "";
-    const parsed = safeJsonParse(txt);
-
-    if(!parsed || typeof parsed !== "object"){
-      errEl.textContent = "That doesn’t look like valid JSON. Paste the full status.json object.";
-      errEl.style.display = "block";
-      return;
+      return data;
     }
 
-    state = normalizeStatus(parsed);
-    saveState();
-    renderAll();
-    closeModal("modalImport");
-  }
+    function getLocal(){
+      const s = localStorage.getItem(STORAGE_KEY);
+      if(!s) return null;
+      const p = safeJSON(s);
+      if(!p.ok) return null;
+      return normalizeData(p.val);
+    }
+    function setLocal(data){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data, null, 2)); }
 
-  async function loadRemote(){
-    // Default: load a status.json that sits next to this dashboard.html
-    // Override: add ?statusUrl=https://example.com/status.json
-    const params = new URLSearchParams(window.location.search || "");
-    const override = params.get("statusUrl");
+    function getMode(){ return localStorage.getItem(MODE_KEY) || "local"; }
+    function setMode(mode){
+      localStorage.setItem(MODE_KEY, mode);
+      $("localModePill").innerHTML = "Mode: <b>" + (mode === "remote" ? "Remote" : "Local") + "</b>";
+    }
 
-    const defaultUrl = new URL("status.json", window.location.href).toString();
-    const url = (override && override.startsWith("http")) ? override : defaultUrl;
+    let STATE = normalizeData(getLocal() || DEFAULT_DATA);
 
-    try{
-      const res = await fetch(url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(), { cache:"no-store" });
-      if(!res.ok) throw new Error("HTTP " + res.status + " at " + url);
-      const json = await res.json();
-      state = normalizeStatus(json);
-      renderAll();
+    function escapeHtml(s){
+      return String(s)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
 
-      try{ console.log("[Dashboard] Remote loaded:", url); }catch(e){}
-      if(!isInNotionIframe()){
-        alert("Remote status.json loaded from:
-" + url + "
+    function render(){
+      $("updatedAt").textContent = STATE.updatedAt || "-";
+      $("overallBadge").textContent = STATE.overall.badge || "-";
+      $("overallBadge2").textContent = STATE.overall.badge || "-";
+      $("overallHeadline").textContent = STATE.overall.headline || "-";
+      $("overallNotes").textContent = STATE.overall.notes || "-";
 
-Tip: click Save (Edit Overall/Branch) to persist locally, or Export to download it.");
+      const sum = (STATE.overall.summary || "").trim();
+      $("overallSummary").textContent = sum || "-";
+      const pill = $("overallSummaryPill");
+      if(sum){
+        pill.style.display = "inline-flex";
+        pill.innerHTML = "Summary: <b>" + escapeHtml(sum) + "</b>";
+      }else{
+        pill.style.display = "none";
       }
-    }catch(e){
-      const msg =
-        "Could not load remote status.json.
 
-" +
-        "Tried:
-" + url + "
+      const rows = [
+        ["n8n", "n8n Workflows"],
+        ["forms", "Forms & Apps"],
+        ["reports", "Reports"],
+        ["website", "Website"],
+        ["architecture", "Architecture"]
+      ];
 
-" +
-        "Common causes:
-" +
-        "• status.json is not in the same folder as dashboard.html
-" +
-        "• GitHub Pages not enabled / wrong branch or folder
-" +
-        "• File name is different (must be exactly status.json)
-" +
-        "• 404/403 due to repo settings
+      $("bKey").innerHTML = rows.map(([k,l]) => `<option value="${k}">${l}</option>`).join("");
 
-" +
-        "Error: " + e.message;
+      const container = $("branches");
+      container.innerHTML = "";
 
-      try{ console.error("[Dashboard] Remote load failed:", e); }catch(_){}
-      alert(msg);
-    }
-  }
+      for(const [key, label] of rows){
+        const b = STATE.branches[key];
+        const wrap = document.createElement("div");
 
-  function isInNotionIframe(){
-    try{ return window.self !== window.top; }catch(e){ return true; }
-  }
+        const top = document.createElement("div");
+        top.className = "tr";
 
-  document.addEventListener("DOMContentLoaded", () => {
-    loadState();
-    renderAll();
+        const left = document.createElement("div");
+        left.innerHTML = '<div class="area">' + escapeHtml(label) + '</div><div class="status">' + escapeHtml(b.status || "-") + '</div>';
 
-    document.getElementById("btnEditOverall").addEventListener("click", openOverallModal);
-    document.getElementById("btnEditBranch").addEventListener("click", () => openBranchModal("n8n"));
-    document.getElementById("btnImport").addEventListener("click", openImportModal);
-    document.getElementById("btnExport").addEventListener("click", () => {
-      const exportObj = JSON.parse(JSON.stringify(state));
-      exportObj.updatedAt = new Date().toISOString();
-      downloadText("status.json", JSON.stringify(exportObj, null, 2));
-    });
-    document.getElementById("btnRefreshRemote").addEventListener("click", loadRemote);
-    document.getElementById("btnResetLocal").addEventListener("click", () => {
-      if(confirm("Reset local edits? This clears browser-saved changes and reloads defaults.")){
-        resetLocal();
+        const mid = document.createElement("div");
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        const i = document.createElement("i");
+        i.style.width = (clamp(b.progress||0,0,100)) + "%";
+        bar.appendChild(i);
+        mid.appendChild(bar);
+
+        const right = document.createElement("div");
+        right.style.textAlign = "right";
+        right.style.fontWeight = "800";
+        right.textContent = (clamp(b.progress||0,0,100)) + "%";
+
+        top.appendChild(left);
+        top.appendChild(mid);
+        top.appendChild(right);
+
+        const body = document.createElement("div");
+        body.style.padding = "0 12px 12px";
+
+        const h = document.createElement("div");
+        h.style.marginTop = "10px";
+        h.style.color = "var(--muted)";
+        h.style.fontWeight = "650";
+        h.textContent = "Current Checkpoints";
+        body.appendChild(h);
+
+        const ul = document.createElement("ul");
+        ul.className = "ckpts";
+        const c = Array.isArray(b.checkpoints) ? b.checkpoints : [];
+        if(c.length){
+          c.forEach(t => {
+            const li = document.createElement("li");
+            li.textContent = t;
+            ul.appendChild(li);
+          });
+        }else{
+          const li = document.createElement("li");
+          li.textContent = "-";
+          ul.appendChild(li);
+        }
+        body.appendChild(ul);
+
+        wrap.appendChild(top);
+        wrap.appendChild(body);
+        container.appendChild(wrap);
       }
-    });
 
-    document.getElementById("overallSaveBtn").addEventListener("click", saveOverallFromModal);
-    document.getElementById("branchSaveBtn").addEventListener("click", saveBranchFromModal);
+      setMode(getMode());
+    }
 
-    document.getElementById("branchKeySelect").addEventListener("change", (e) => {
-      setBranchModalFields(e.target.value);
-    });
+    function openOverlay(id){ $(id).classList.add("show"); }
+    function closeOverlay(id){ $(id).classList.remove("show"); }
 
-    document.getElementById("importApplyBtn").addEventListener("click", applyImport);
-  });
+    function wireModalClose(){
+      document.addEventListener("click", (e) => {
+        const t = e.target;
+        if(!(t instanceof Element)) return;
+        const closeId = t.getAttribute("data-close");
+        if(closeId){ e.preventDefault(); closeOverlay(closeId); }
+        if(t.classList.contains("overlay")) t.classList.remove("show");
+      });
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape"){
+          ["ovOverall","ovBranch","ovImport"].forEach(id => $(id).classList.remove("show"));
+        }
+      });
+    }
 
-  window.__tpb_init = function(){
-    loadState();
-    renderAll();
-  };
-  </script>
+    function fillOverallForm(){
+      $("oBadge").value = STATE.overall.badge || "";
+      $("oUpdatedAt").value = STATE.updatedAt || new Date().toISOString();
+      $("oHeadline").value = STATE.overall.headline || "";
+      $("oNotes").value = STATE.overall.notes || "";
+      $("oSummary").value = STATE.overall.summary || "";
+    }
+    function fillBranchForm(key){
+      const b = STATE.branches[key];
+      $("bKey").value = key;
+      $("bStatus").value = b.status || "In Progress";
+      $("bProgress").value = clamp(b.progress||0, 0, 100);
+      $("bCkpts").value = (b.checkpoints || []).join("\\n");
+    }
 
-  <script>
-  // keep password + behavior exactly
-  (function(){
-    const PASSWORD = "tradeprobuddy";
-    const gateOverlay = document.getElementById("gateOverlay");
-    const app = document.getElementById("app");
-    const input = document.getElementById("gateInput");
-    const btn = document.getElementById("gateBtn");
-    const err = document.getElementById("gateErr");
+    async function loadRemote(){
+      const url = "./status.json?cb=" + Date.now();
+      const res = await fetch(url, { cache: "no-store" });
+      if(!res.ok) throw new Error("Fetch failed: " + res.status);
+      const raw = await res.json();
+      STATE = normalizeData(raw);
+      setLocal(STATE);
+      setMode("remote");
+      render();
+      toast("Loaded remote", "Pulled ./status.json and refreshed the dashboard.");
+    }
+
+    function exportJson(){
+      const blob = new Blob([JSON.stringify(STATE, null, 2)], { type:"application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "status.json";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+      toast("Exported", "Downloaded status.json");
+    }
+
+    function init(){
+      $("btnAbout").addEventListener("click", () => {
+        const box = $("howItWorks");
+        box.style.display = box.style.display === "none" ? "block" : "none";
+      });
+
+      $("btnEditOverall").addEventListener("click", () => { fillOverallForm(); openOverlay("ovOverall"); });
+      $("btnEditBranch").addEventListener("click", () => { fillBranchForm($("bKey").value || "n8n"); openOverlay("ovBranch"); });
+      $("btnImport").addEventListener("click", () => { $("importJson").value = ""; openOverlay("ovImport"); });
+      $("btnExport").addEventListener("click", exportJson);
+
+      $("btnLoadRemote").addEventListener("click", async () => {
+        try { await loadRemote(); }
+        catch(e){
+          setMode("local");
+          toast("Load remote failed", "Could not load ./status.json. Check browser console.");
+          console.error(e);
+        }
+      });
+
+      $("btnResetLocal").addEventListener("click", () => {
+        if(!confirm("Reset local edits on this device?")) return;
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(MODE_KEY);
+        STATE = normalizeData(DEFAULT_DATA);
+        setMode("local");
+        render();
+        toast("Reset", "Local dashboard data reset.");
+      });
+
+      $("saveOverall").addEventListener("click", () => {
+        STATE.overall.badge = ($("oBadge").value || "").trim();
+        STATE.updatedAt = ($("oUpdatedAt").value || "").trim() || new Date().toISOString();
+        STATE.overall.headline = ($("oHeadline").value || "").trim();
+        STATE.overall.notes = ($("oNotes").value || "").trim();
+        STATE.overall.summary = ($("oSummary").value || "").trim();
+        setLocal(STATE);
+        setMode("local");
+        render();
+        closeOverlay("ovOverall");
+        toast("Saved", "Overall updated (local).");
+      });
+
+      $("bKey").addEventListener("change", () => fillBranchForm($("bKey").value));
+
+      $("saveBranch").addEventListener("click", () => {
+        const key = $("bKey").value;
+        STATE.branches[key].status = $("bStatus").value;
+        STATE.branches[key].progress = clamp(parseInt($("bProgress").value || "0", 10), 0, 100);
+        STATE.branches[key].checkpoints = ($("bCkpts").value || "").split("\\n").map(s => s.trim()).filter(Boolean);
+        STATE.updatedAt = new Date().toISOString();
+        setLocal(STATE);
+        setMode("local");
+        render();
+        closeOverlay("ovBranch");
+        toast("Saved", "Branch updated (local).");
+      });
+
+      $("applyImport").addEventListener("click", () => {
+        const p = safeJSON($("importJson").value || "");
+        if(!p.ok){ toast("Import failed", "Invalid JSON."); return; }
+        STATE = normalizeData(p.val);
+        setLocal(STATE);
+        setMode("local");
+        render();
+        closeOverlay("ovImport");
+        toast("Imported", "Applied JSON to local storage.");
+      });
+
+      wireModalClose();
+
+      const local = getLocal();
+      if(local) STATE = local;
+      render();
+      fillBranchForm("n8n");
+    }
 
     function unlock(){
-      const v = String(input.value || "").trim();
-      if (v === PASSWORD){
-        gateOverlay.style.display = "none";
-        app.style.display = "block";
-        try{ localStorage.setItem("tpb_dash_ok","1"); }catch(e){}
-        try{ window.__tpb_init && window.__tpb_init(); }catch(e){}
-      }else{
-        err.style.display = "block";
-        input.focus();
-        input.select();
-      }
+      // remove gate from DOM so it can never block clicks afterwards
+      document.getElementById("gate").remove();
+      localStorage.setItem(PASS_KEY, "1");
+      init();
     }
 
-    btn.addEventListener("click", unlock);
-    input.addEventListener("keydown", (e)=>{ if (e.key === "Enter") unlock(); });
-
-    try{
-      if (localStorage.getItem("tpb_dash_ok") === "1"){
-        gateOverlay.style.display = "none";
-        app.style.display = "block";
-        try{ window.__tpb_init && window.__tpb_init(); }catch(e){}
-      }else{
-        input.focus();
+    function checkGate(){
+      if(localStorage.getItem(PASS_KEY) === "1"){
+        unlock();
+        return;
       }
-    }catch(e){
-      input.focus();
+      $("gateBtn").addEventListener("click", () => {
+        const v = ($("gateCode").value || "").trim();
+        if(v === PASSCODE){
+          $("gateErr").classList.remove("show");
+          unlock();
+        }else{
+          $("gateErr").classList.add("show");
+        }
+      });
+      $("gateCode").addEventListener("keydown", (e) => { if(e.key === "Enter") $("gateBtn").click(); });
     }
-  })();
+
+    (function boot(){
+      if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", checkGate, { once:true });
+      }else{
+        checkGate();
+      }
+    })();
   </script>
 </body>
 </html>
