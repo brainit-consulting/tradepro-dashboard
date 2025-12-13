@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TradeProBuddy — Interactive Project Dashboard</title>
+  <style>
+    :root{
+      --bg:#070a12;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.075);
+      --line:rgba(148,163,184,.18);
+      --text:#e5e7eb;
+      --muted:#aab3c2;
+      --brand:#7B3FA0;
+      --mint:#34D399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:
+        radial-gradient(1100px 520px at 20% -10%, rgba(123,63,160,.24), transparent 60%),
+        radial-gradient(900px 520px at 90% 0%, rgba(52,211,153,.12), transparent 55%),
+        radial-gradient(700px 420px at 50% 110%, rgba(59,130,246,.10), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1200px;margin:0 auto;padding:26px 18px 70px}
+
+    /* -------------------------------------------------------
+       Gate overlay (keep exactly)
+    ------------------------------------------------------- */
+    #gateOverlay{
+      position:fixed; inset:0; z-index:9999;
+      display:flex; align-items:center; justify-content:center;
+      padding:36px 16px;
+      background:
+        radial-gradient(circle at top, rgba(15,23,42,.95), rgba(2,6,23,.98) 55%, rgba(0,0,0,.98) 100%);
+      backdrop-filter:saturate(180%) blur(4px);
+    }
+    .gateCard{
+      width:min(520px, 94vw);
+      background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.06));
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:22px;
+      box-shadow: var(--shadow);
+      padding:22px 20px 18px;
+    }
+    .gateTop{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-bottom:10px;
+    }
+    .gateBadge{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(123,63,160,.12);
+      border:1px solid rgba(123,63,160,.25);
+      color:#e9d5ff;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .gateHint{
+      font-size:.92rem;
+      color:rgba(226,232,240,.78);
+      text-align:right;
+      line-height:1.25;
+    }
+    .gateTitle{
+      font-size:1.15rem;
+      margin:8px 0 6px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .gateSub{
+      margin:0 0 14px;
+      color:rgba(226,232,240,.78);
+      font-size:.98rem;
+      line-height:1.4;
+    }
+    .gateRow{
+      display:flex; gap:10px; align-items:center;
+    }
+    .gateInput{
+      flex:1;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.28);
+      background:rgba(2,6,23,.45);
+      color:var(--text);
+      outline:none;
+      font-size:1rem;
+    }
+    .gateBtn{
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(52,211,153,.30);
+      background:linear-gradient(135deg, rgba(52,211,153,.20), rgba(123,63,160,.12));
+      color:#dcfce7;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .gateErr{
+      margin:10px 2px 0;
+      font-size:.92rem;
+      color:#fecaca;
+      display:none;
+    }
+
+    /* -------------------------------------------------------
+       Header / layout
+    ------------------------------------------------------- */
+    header{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:18px;
+      padding:10px 2px 18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+    }
+    .logo{
+      width:46px;height:46px;border-radius:14px;
+      background:linear-gradient(135deg, rgba(123,63,160,.85), rgba(52,211,153,.65));
+      box-shadow:0 14px 40px rgba(123,63,160,.25);
+    }
+    .brand h1{
+      margin:0;
+      font-size:1.35rem;
+      letter-spacing:.2px;
+      font-weight:900;
+    }
+    .brand p{
+      margin:2px 0 0;
+      color:rgba(226,232,240,.74);
+      font-size:.96rem;
+      line-height:1.25;
+    }
+    .meta{
+      text-align:right;
+      color:rgba(226,232,240,.68);
+      font-size:.92rem;
+      line-height:1.2;
+    }
+    .meta strong{color:rgba(226,232,240,.92)}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      margin-top:8px;
+    }
+    @media (max-width: 960px){
+      .grid{grid-template-columns:1fr}
+      .meta{text-align:left}
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+      border:1px solid rgba(148,163,184,.16);
+      border-radius: var(--radius);
+      box-shadow: 0 18px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+    }
+    .card .hd{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:14px 16px 12px;
+      background:linear-gradient(90deg, rgba(123,63,160,.12), rgba(52,211,153,.06));
+      border-bottom:1px solid rgba(148,163,184,.14);
+    }
+    .card .hd h2{
+      margin:0;
+      font-size:1.05rem;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      font-weight:800;
+      font-size:.84rem;
+      color:#e2e8f0;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.35);
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.ok{background:var(--mint); box-shadow:0 0 0 4px rgba(52,211,153,.12)}
+    .dot.ip{background:var(--warn); box-shadow:0 0 0 4px rgba(251,191,36,.12)}
+    .dot.bad{background:var(--bad); box-shadow:0 0 0 4px rgba(251,113,133,.14)}
+    .bd{padding:14px 16px 16px}
+
+    .small{
+      color:rgba(226,232,240,.72);
+      font-size:.95rem;
+      line-height:1.45;
+      margin:0;
+    }
+
+    /* -------------------------------------------------------
+       Buttons / inputs
+    ------------------------------------------------------- */
+    .btnRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:12px;
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.34);
+      color:rgba(226,232,240,.92);
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:hover{border-color: rgba(52,211,153,.28); transform: translateY(-1px)}
+    .btn{transition: all .18s ease}
+    .btn.primary{
+      border-color: rgba(52,211,153,.30);
+      background:linear-gradient(135deg, rgba(52,211,153,.20), rgba(123,63,160,.12));
+      color:#dcfce7;
+    }
+    .btn.danger{
+      border-color: rgba(251,113,133,.35);
+      background:linear-gradient(135deg, rgba(251,113,133,.16), rgba(123,63,160,.10));
+      color:#fee2e2;
+    }
+    .btn.tiny{
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:.86rem;
+    }
+    .btn:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .fieldGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      margin-top:12px;
+    }
+    @media (max-width: 720px){ .fieldGrid{grid-template-columns:1fr} }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .label{
+      color:rgba(226,232,240,.70);
+      font-size:.82rem;
+      font-weight:900;
+      letter-spacing:.18px;
+    }
+    .input, .textarea, .select{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.34);
+      color:rgba(226,232,240,.92);
+      outline:none;
+      font-size:.98rem;
+    }
+    .textarea{min-height:90px; resize:vertical; line-height:1.35}
+    .help{
+      margin-top:10px;
+      color:rgba(226,232,240,.62);
+      font-size:.88rem;
+      line-height:1.35;
+    }
+
+    /* -------------------------------------------------------
+       Progress table
+    ------------------------------------------------------- */
+    table{width:100%; border-collapse:separate; border-spacing:0 10px}
+    th{
+      text-align:left;
+      font-size:.82rem;
+      color:rgba(226,232,240,.70);
+      padding:0 10px 6px;
+      letter-spacing:.18px;
+      font-weight:800;
+    }
+    td{
+      padding:12px 10px;
+      background:rgba(2,6,23,.34);
+      border-top:1px solid rgba(148,163,184,.14);
+      border-bottom:1px solid rgba(148,163,184,.10);
+    }
+    tr td:first-child{
+      border-left:1px solid rgba(148,163,184,.12);
+      border-radius:14px 0 0 14px;
+    }
+    tr td:last-child{
+      border-right:1px solid rgba(148,163,184,.12);
+      border-radius:0 14px 14px 0;
+    }
+    .rowTitle{font-weight:900}
+    .rowSub{color:rgba(226,232,240,.66); font-size:.84rem; margin-top:2px}
+    .statusTag{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(2,6,23,.35);
+      font-weight:900;
+      font-size:.84rem;
+      white-space:nowrap;
+    }
+    .progress-shell{
+      height:10px;
+      border-radius:999px;
+      background:rgba(148,163,184,.14);
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.12);
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:linear-gradient(90deg, rgba(52,211,153,.85), rgba(123,63,160,.75));
+      box-shadow:0 10px 26px rgba(123,63,160,.18);
+      transition:width .45s ease;
+    }
+    .progress-label{
+      text-align:right;
+      color:rgba(226,232,240,.72);
+      font-size:.82rem;
+      font-weight:900;
+      margin-top:6px;
+    }
+    .rowBtn{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .rowBtn .btn{
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:.84rem;
+    }
+
+    /* -------------------------------------------------------
+       Detail cards
+    ------------------------------------------------------- */
+    .section{
+      margin-top:16px;
+    }
+    .section h3{
+      margin:0 0 8px;
+      font-size:1rem;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .section p{margin:0;color:rgba(226,232,240,.74); line-height:1.45}
+    .checklist{
+      margin:10px 0 0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:9px;
+    }
+    .checklist li{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:10px 10px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.14);
+      background:rgba(2,6,23,.30);
+      color:rgba(226,232,240,.84);
+    }
+    .check{
+      width:18px;height:18px; margin-top:1px;
+      border-radius:6px;
+      border:1px solid rgba(52,211,153,.35);
+      background:rgba(52,211,153,.14);
+      flex:0 0 auto;
+    }
+
+    /* -------------------------------------------------------
+       Modal
+    ------------------------------------------------------- */
+    .modal{
+      position:fixed;
+      inset:0;
+      z-index:9998;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px 16px;
+      background:rgba(0,0,0,.62);
+      backdrop-filter: blur(6px);
+    }
+    .modalCard{
+      width:min(860px, 96vw);
+      max-height:min(80vh, 880px);
+      overflow:auto;
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:22px;
+      box-shadow: var(--shadow);
+      padding:16px 16px 14px;
+    }
+    .modalHd{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      padding:6px 4px 12px;
+      border-bottom:1px solid rgba(148,163,184,.16);
+      margin-bottom:12px;
+    }
+    .modalHd h3{
+      margin:0;
+      font-size:1.05rem;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .closeX{
+      width:40px;height:40px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(2,6,23,.32);
+      color:rgba(226,232,240,.9);
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    footer{
+      margin-top:20px;
+      color:rgba(226,232,240,.55);
+      font-size:.86rem;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Gate overlay -->
+  <div id="gateOverlay">
+    <div class="gateCard" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+      <div class="gateTop">
+        <div class="gateBadge">
+          <span>🔒</span>
+          <span>TradeProBuddy Dashboard</span>
+        </div>
+        <div class="gateHint">
+          Protected view<br><strong>Enter passcode</strong>
+        </div>
+      </div>
+      <div id="gateTitle" class="gateTitle">Access Required</div>
+      <p class="gateSub">This dashboard is private. Enter the passcode to view progress, links, and current status.</p>
+      <div class="gateRow">
+        <input id="gateInput" class="gateInput" type="password" placeholder="Passcode…" autocomplete="current-password" />
+        <button id="gateBtn" class="gateBtn">Unlock</button>
+      </div>
+      <div id="gateErr" class="gateErr">Incorrect passcode. Try again.</div>
+    </div>
+  </div>
+
+  <div class="wrap" id="app" style="display:none;">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>TradeProBuddy™ Project Dashboard</h1>
+          <p>Live view + editable data (saved to your browser, exportable as status.json).</p>
+        </div>
+      </div>
+      <div class="meta">
+        <div><strong>Owner:</strong> Emile (BrainIT Consulting)</div>
+        <div><strong>Updated:</strong> <span id="updatedDate">—</span></div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Overall -->
+      <div class="card">
+        <div class="hd">
+          <h2>Overall Status</h2>
+          <div class="pill">
+            <span class="dot ip" id="overallDot"></span>
+            <span id="overallBadgeText">In Progress</span>
+          </div>
+        </div>
+        <div class="bd">
+          <p class="small" id="overallHeadline" style="font-weight:900;margin-bottom:6px;">—</p>
+          <p class="small" id="overallNotes">—</p>
+
+          <div class="btnRow">
+            <button class="btn primary" id="btnEditOverall" type="button">✏️ Edit Overall</button>
+            <button class="btn" id="btnEditBranch" type="button">🧩 Edit a Branch</button>
+            <button class="btn" id="btnImport" type="button">⬇️ Import JSON</button>
+            <button class="btn" id="btnExport" type="button">⬆️ Export status.json</button>
+            <button class="btn" id="btnRefreshRemote" type="button" title="Loads from the remote status.json (does not overwrite until you Save)">🔄 Load Remote</button>
+            <button class="btn danger" id="btnResetLocal" type="button" title="Clears local saved edits and reloads the default data">🧹 Reset Local</button>
+          </div>
+
+          <div class="help">
+            <strong>How this works:</strong> edits save to <code>localStorage</code> in your browser (private to your device).
+            Use <strong>Export</strong> to download a <code>status.json</code> you can publish from n8n/GitHub.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Progress -->
+      <div class="card">
+        <div class="hd">
+          <h2>Progress by Branch</h2>
+          <div class="pill">
+            <span class="dot ip" id="branchSummaryDot"></span>
+            <span id="branchSummaryText">Rolling Forward</span>
+          </div>
+        </div>
+        <div class="bd">
+          <table aria-label="Project progress table">
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Status</th>
+                <th style="width:46%;">Progress</th>
+              </tr>
+            </thead>
+            <tbody id="progressTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail sections -->
+    <div class="grid" style="margin-top:18px;">
+      <div class="card section" id="detailLeft">
+        <div class="hd">
+          <h2 id="detailTitleLeft">n8n Workflows</h2>
+          <div class="pill"><span class="dot ip" id="detailDotLeft"></span><span id="detailStatusLeft">—</span></div>
+        </div>
+        <div class="bd">
+          <p class="small" id="detailDescLeft">—</p>
+          <div class="section">
+            <h3>Current Checkpoints</h3>
+            <ul class="checklist" id="detailChecklistLeft"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section" id="detailRight">
+        <div class="hd">
+          <h2 id="detailTitleRight">Forms &amp; Apps</h2>
+          <div class="pill"><span class="dot ip" id="detailDotRight"></span><span id="detailStatusRight">—</span></div>
+        </div>
+        <div class="bd">
+          <p class="small" id="detailDescRight">—</p>
+          <div class="section">
+            <h3>Current Checkpoints</h3>
+            <ul class="checklist" id="detailChecklistRight"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:18px;">
+      <div class="card section" id="detailLowerLeft">
+        <div class="hd">
+          <h2 id="detailTitleLowerLeft">Reports</h2>
+          <div class="pill"><span class="dot ip" id="detailDotLowerLeft"></span><span id="detailStatusLowerLeft">—</span></div>
+        </div>
+        <div class="bd">
+          <p class="small" id="detailDescLowerLeft">—</p>
+          <div class="section">
+            <h3>Current Checkpoints</h3>
+            <ul class="checklist" id="detailChecklistLowerLeft"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section" id="detailLowerRight">
+        <div class="hd">
+          <h2 id="detailTitleLowerRight">Website</h2>
+          <div class="pill"><span class="dot ip" id="detailDotLowerRight"></span><span id="detailStatusLowerRight">—</span></div>
+        </div>
+        <div class="bd">
+          <p class="small" id="detailDescLowerRight">—</p>
+          <div class="section">
+            <h3>Current Checkpoints</h3>
+            <ul class="checklist" id="detailChecklistLowerRight"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card section" id="detailArchitecture" style="margin-top:18px;">
+      <div class="hd">
+        <h2 id="detailTitleArch">Architecture</h2>
+        <div class="pill"><span class="dot ip" id="detailDotArch"></span><span id="detailStatusArch">—</span></div>
+      </div>
+      <div class="bd">
+        <p class="small" id="detailDescArch">—</p>
+
+        <div class="section">
+          <h3>Current Checkpoints</h3>
+          <ul class="checklist" id="detailChecklistArch"></ul>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      © 2025 BrainIT Consulting • TradeProBuddy™ Internal Dashboard
+    </footer>
+  </div>
+
+  <!-- Modal: Overall editor -->
+  <div class="modal" id="modalOverall" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalOverallTitle">
+      <div class="modalHd">
+        <div>
+          <h3 id="modalOverallTitle">Edit Overall</h3>
+          <div class="help" style="margin:6px 0 0;">Saves locally. Export to publish.</div>
+        </div>
+        <button class="closeX" data-close="modalOverall" aria-label="Close" type="button">✕</button>
+      </div>
+
+      <div class="fieldGrid">
+        <div class="field">
+          <div class="label">Badge</div>
+          <input class="input" id="overallBadgeInput" placeholder="e.g. In Progress..." />
+        </div>
+        <div class="field">
+          <div class="label">Updated At (ISO)</div>
+          <input class="input" id="overallUpdatedAtInput" placeholder="2025-12-13T01:34:09.680Z" />
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Headline</div>
+          <input class="input" id="overallHeadlineInput" placeholder="..." />
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Notes</div>
+          <textarea class="textarea" id="overallNotesInput" placeholder="..."></textarea>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Optional Summary (right-card pill)</div>
+          <input class="input" id="overallSummaryInput" placeholder="Rolling Forward / etc" />
+        </div>
+      </div>
+
+      <div class="btnRow" style="margin-top:14px;">
+        <button class="btn primary" id="overallSaveBtn" type="button">💾 Save</button>
+        <button class="btn" data-close="modalOverall" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Branch editor -->
+  <div class="modal" id="modalBranch" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalBranchTitle">
+      <div class="modalHd">
+        <div>
+          <h3 id="modalBranchTitle">Edit Branch</h3>
+          <div class="help" style="margin:6px 0 0;">Edit status / progress / checkpoints. Use one item per line.</div>
+        </div>
+        <button class="closeX" data-close="modalBranch" aria-label="Close" type="button">✕</button>
+      </div>
+
+      <div class="fieldGrid">
+        <div class="field">
+          <div class="label">Branch</div>
+          <select class="select" id="branchKeySelect"></select>
+        </div>
+        <div class="field">
+          <div class="label">Status</div>
+          <select class="select" id="branchStatusSelect" aria-label="Branch status">
+            <!-- options inserted by JS -->
+          </select>
+        </div>
+        <div class="field">
+          <div class="label">Progress (0–100)</div>
+          <input class="input" id="branchProgressInput" type="number" min="0" max="100" step="1" />
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Checkpoints (one per line)</div>
+          <textarea class="textarea" id="branchCheckpointsInput" placeholder="..."></textarea>
+        </div>
+      </div>
+
+      <div class="btnRow" style="margin-top:14px;">
+        <button class="btn primary" id="branchSaveBtn" type="button">💾 Save</button>
+        <button class="btn" data-close="modalBranch" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Import -->
+  <div class="modal" id="modalImport" aria-hidden="true">
+    <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalImportTitle">
+      <div class="modalHd">
+        <div>
+          <h3 id="modalImportTitle">Import JSON</h3>
+          <div class="help" style="margin:6px 0 0;">Paste a status.json object here. We’ll validate lightly and apply it.</div>
+        </div>
+        <button class="closeX" data-close="modalImport" aria-label="Close" type="button">✕</button>
+      </div>
+
+      <div class="field">
+        <div class="label">JSON</div>
+        <textarea class="textarea" id="importTextarea" style="min-height:220px;" placeholder='{ "updatedAt": "...", "overall": {...}, "branches": {...} }'></textarea>
+      </div>
+
+      <div class="btnRow" style="margin-top:14px;">
+        <button class="btn primary" id="importApplyBtn" type="button">✅ Apply + Save Local</button>
+        <button class="btn" data-close="modalImport" type="button">Cancel</button>
+      </div>
+
+      <div class="help" id="importErr" style="color:#fecaca; display:none; margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <script>
+  // =========================================================
+  // Default data (from your message)
+  // =========================================================
+  const DEFAULT_STATUS = {
+    "updatedAt": "2025-12-13T01:34:09.680Z",
+    "overall": {
+      "badge": "In Progress - Testing n8n workflows & JSON controller",
+      "headline": "Dashboard is now wired for auto updates.",
+      "notes": "Next: connect n8n to publish status.json automatically."
+    },
+    "branches": {
+      "n8n": {
+        "status": "In Progress",
+        "progress": 82,
+        "checkpoints": [
+          "Global router to subflows handoff confirmed",
+          "Electrical branch end-to-end test run succeeded",
+          "Email hardening added to prevent empty addresses from failing runs",
+          "Contractor Profiles HTML Report (V7) wired and branded",
+          "Multi-trade contractor records live in DB"
+        ]
+      },
+      "forms": {
+        "status": "In Progress",
+        "progress": 75,
+        "checkpoints": [
+          "Roofer survey form V1.6.x integrated with core n8n workflow",
+          "Electrician form fields drafted (USA-only) and mapped to the Electrical subflow",
+          "Plumber form branch created; email field hardening in progress",
+          "App embed plus demo pages working for Trade Pros entry points"
+        ]
+      },
+      "reports": {
+        "status": "Active",
+        "progress": 85,
+        "checkpoints": [
+          "Contractor Homeowner Adjuster HTML outputs implemented for roofing",
+          "Electrical estimate drafts polished by Style Expert and emailed end-to-end",
+          "Sortable Contractor Profiles HTML Report (V7) live for internal use",
+          "Status plus progress dashboard live (this page)"
+        ]
+      },
+      "website": {
+        "status": "In Progress",
+        "progress": 95,
+        "checkpoints": [
+          "Trade Pros landing routes to Roofing Electrical Plumbing demos",
+          "Roofers demo page baseline preserved (gate plus app plus report modal)",
+          "Electrical demo page live and sending emails successfully",
+          "Copy updates: roofer-friendly messaging plus disclaimers"
+        ]
+      },
+      "architecture": {
+        "status": "Planned",
+        "progress": 50,
+        "checkpoints": [
+          "Pre-Gmail guard node (validate recipients, log and continue)",
+          "Shared Send Safe Email subflow reused by all trades",
+          "Per Form: validate Thank You pages and autoresponder emails",
+          "Centralized email normalization (To CC BCC Reply-To)"
+        ]
+      }
+    }
+  };
+
+  // =========================================================
+  // State (localStorage-backed)
+  // =========================================================
+  const LS_KEY = "tpb_dash_data_v1";
+  let state = null;
+
+  function safeJsonParse(str){
+    try{ return JSON.parse(str); }catch(e){ return null; }
+  }
+
+  function loadState(){
+    const raw = (() => { try { return localStorage.getItem(LS_KEY); } catch(e){ return null; } })();
+    const parsed = raw ? safeJsonParse(raw) : null;
+    state = normalizeStatus(parsed || DEFAULT_STATUS);
+  }
+
+  function saveState(){
+    if(!state.updatedAt || isNaN(Date.parse(state.updatedAt))){
+      state.updatedAt = new Date().toISOString();
+    }
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state, null, 2)); }catch(e){}
+  }
+
+  function resetLocal(){
+    try{ localStorage.removeItem(LS_KEY); }catch(e){}
+    state = normalizeStatus(DEFAULT_STATUS);
+    renderAll();
+  }
+
+  function normalizeStatus(s){
+    const out = {
+      updatedAt: (s && typeof s.updatedAt === "string") ? s.updatedAt : new Date().toISOString(),
+      overall: {
+        badge: s?.overall?.badge ?? "In Progress",
+        headline: s?.overall?.headline ?? "",
+        notes: s?.overall?.notes ?? "",
+        summary: s?.overall?.summary ?? s?.overall?.kpiSummary ?? ""
+      },
+      branches: {}
+    };
+
+    const defaultBranches = ["n8n","forms","reports","website","architecture"];
+    const srcBranches = s?.branches && typeof s.branches === "object" ? s.branches : {};
+    for(const k of defaultBranches){
+      const b = srcBranches[k] || {};
+      out.branches[k] = {
+        status: b.status ?? "In Progress",
+        progress: clampInt(b.progress ?? 0, 0, 100),
+        checkpoints: Array.isArray(b.checkpoints) ? b.checkpoints.filter(Boolean).map(String) : []
+      };
+    }
+    return out;
+  }
+
+  function clampInt(v, min, max){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return min;
+    return Math.max(min, Math.min(max, Math.round(n)));
+  }
+
+  // =========================================================
+  // UI helpers
+  // =========================================================
+  function dotClassForStatus(text){
+    const s = String(text || "").toLowerCase();
+    if(s.includes("active") || s.includes("done") || s.includes("success")) return "ok";
+    if(s.includes("blocked") || s.includes("fail") || s.includes("error")) return "bad";
+    return "ip";
+  }
+
+  function setDot(el, statusText){
+    if(!el) return;
+    el.classList.remove("ok","ip","bad");
+    el.classList.add(dotClassForStatus(statusText));
+  }
+
+  function formatUpdated(iso){
+    try{
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+    }catch(e){
+      return String(iso || "");
+    }
+  }
+
+  function downloadText(filename, text){
+    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // =========================================================
+  // Render
+  // =========================================================
+  const BRANCH_META = {
+    n8n:          { title:"n8n",           sub:"Routing + subflows + JSON controller" , desc:"Root router dispatches to trade-specific subflows. Each trade handles estimate generation + polish + messaging."},
+    forms:        { title:"Forms & Apps",  sub:"Survey capture + app embeds"          , desc:"Survey-style forms/apps capture job details. Data posts to the root workflow, which routes to the correct trade subflow."},
+    reports:      { title:"Reports",       sub:"HTML outputs + internal views"        , desc:"Customer-facing drafts and internal tables. Focus: fast, readable, branded outputs."},
+    website:      { title:"Website",       sub:"Landing + demo routes"                , desc:"Demo pages live under BrainIT Consulting, with password-gated previews and embedded apps."},
+    architecture: { title:"Architecture",  sub:"Conventions + reuse plan"             , desc:"Keep it modular: root router → subflows per trade. Reuse common blocks (email, normalization, logging) as shared subflows."},
+  };
+
+  function renderAll(){
+    document.getElementById("updatedDate").textContent = formatUpdated(state.updatedAt);
+
+    document.getElementById("overallBadgeText").textContent = state.overall.badge || "";
+    document.getElementById("overallHeadline").textContent = state.overall.headline || "";
+    document.getElementById("overallNotes").textContent = state.overall.notes || "";
+    setDot(document.getElementById("overallDot"), state.overall.badge);
+
+    const summary = state.overall.summary || state.overall.badge || "Rolling Forward";
+    document.getElementById("branchSummaryText").textContent = summary;
+    setDot(document.getElementById("branchSummaryDot"), summary);
+
+    const tbody = document.getElementById("progressTbody");
+    tbody.innerHTML = "";
+    for(const key of Object.keys(BRANCH_META)){
+      const meta = BRANCH_META[key];
+      const b = state.branches[key];
+
+      const tr = document.createElement("tr");
+      tr.setAttribute("data-branch-row", key);
+
+      const td1 = document.createElement("td");
+      td1.innerHTML = `<div class="rowTitle">${meta.title}</div><div class="rowSub">${meta.sub}</div>`;
+
+      const td2 = document.createElement("td");
+      const statusTag = document.createElement("span");
+      statusTag.className = "statusTag";
+      const dot = document.createElement("span");
+      dot.className = "dot " + dotClassForStatus(b.status);
+      statusTag.appendChild(dot);
+      statusTag.appendChild(document.createTextNode(" " + (b.status || "")));
+      td2.appendChild(statusTag);
+
+      const td3 = document.createElement("td");
+      const shell = document.createElement("div");
+      shell.className = "progress-shell";
+      const fill = document.createElement("div");
+      fill.className = "progress-bar";
+      fill.style.width = (clampInt(b.progress,0,100)) + "%";
+      shell.appendChild(fill);
+
+      const label = document.createElement("div");
+      label.className = "progress-label";
+      label.textContent = clampInt(b.progress,0,100) + "%";
+
+      const rowBtns = document.createElement("div");
+      rowBtns.className = "rowBtn";
+      rowBtns.style.marginTop = "10px";
+      const editBtn = document.createElement("button");
+      editBtn.className = "btn tiny";
+      editBtn.type = "button";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => openBranchModal(key));
+      rowBtns.appendChild(editBtn);
+
+      td3.appendChild(shell);
+      td3.appendChild(label);
+      td3.appendChild(rowBtns);
+
+      tr.appendChild(td1);
+      tr.appendChild(td2);
+      tr.appendChild(td3);
+      tbody.appendChild(tr);
+    }
+
+    renderDetailCard("Left", "n8n");
+    renderDetailCard("Right", "forms");
+    renderDetailCard("LowerLeft", "reports");
+    renderDetailCard("LowerRight", "website");
+    renderDetailCard("Arch", "architecture", true);
+  }
+
+  function renderDetailCard(slot, branchKey, isArch=false){
+    const meta = BRANCH_META[branchKey];
+    const b = state.branches[branchKey];
+
+    const titleEl = document.getElementById(isArch ? "detailTitleArch" : `detailTitle${slot}`);
+    const dotEl   = document.getElementById(isArch ? "detailDotArch" : `detailDot${slot}`);
+    const statEl  = document.getElementById(isArch ? "detailStatusArch" : `detailStatus${slot}`);
+    const descEl  = document.getElementById(isArch ? "detailDescArch" : `detailDesc${slot}`);
+    const listEl  = document.getElementById(isArch ? "detailChecklistArch" : `detailChecklist${slot}`);
+
+    if(titleEl) titleEl.textContent = meta.title;
+    if(statEl) statEl.textContent = b.status || "";
+    if(dotEl) setDot(dotEl, b.status);
+    if(descEl) descEl.textContent = meta.desc;
+
+    if(listEl){
+      listEl.innerHTML = "";
+      for(const item of (b.checkpoints || [])){
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="check" aria-hidden="true"></span><div>${escapeHtml(String(item))}</div>`;
+        listEl.appendChild(li);
+      }
+    }
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // =========================================================
+  // Modals
+  // =========================================================
+  function openModal(id){
+    const m = document.getElementById(id);
+    if(!m) return;
+    m.style.display = "flex";
+    m.setAttribute("aria-hidden","false");
+  }
+  function closeModal(id){
+    const m = document.getElementById(id);
+    if(!m) return;
+    m.style.display = "none";
+    m.setAttribute("aria-hidden","true");
+  }
+
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if(t && t.getAttribute && t.getAttribute("data-close")){
+      closeModal(t.getAttribute("data-close"));
+    }
+    if(t && t.classList && t.classList.contains("modal")){
+      t.style.display = "none";
+      t.setAttribute("aria-hidden","true");
+    }
+  });
+
+  function openOverallModal(){
+    document.getElementById("overallBadgeInput").value = state.overall.badge || "";
+    document.getElementById("overallHeadlineInput").value = state.overall.headline || "";
+    document.getElementById("overallNotesInput").value = state.overall.notes || "";
+    document.getElementById("overallSummaryInput").value = state.overall.summary || "";
+    document.getElementById("overallUpdatedAtInput").value = state.updatedAt || "";
+    openModal("modalOverall");
+  }
+
+  function saveOverallFromModal(){
+    state.overall.badge = String(document.getElementById("overallBadgeInput").value || "").trim();
+    state.overall.headline = String(document.getElementById("overallHeadlineInput").value || "").trim();
+    state.overall.notes = String(document.getElementById("overallNotesInput").value || "").trim();
+    state.overall.summary = String(document.getElementById("overallSummaryInput").value || "").trim();
+
+    const updatedAt = String(document.getElementById("overallUpdatedAtInput").value || "").trim();
+    state.updatedAt = updatedAt || new Date().toISOString();
+    if(isNaN(Date.parse(state.updatedAt))) state.updatedAt = new Date().toISOString();
+
+    saveState();
+    renderAll();
+    closeModal("modalOverall");
+  }
+
+  function fillBranchSelect(){
+    const sel = document.getElementById("branchKeySelect");
+    sel.innerHTML = "";
+    for(const key of Object.keys(BRANCH_META)){
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = BRANCH_META[key].title;
+      sel.appendChild(opt);
+    }
+  }
+
+  function openBranchModal(branchKey){
+    fillBranchSelect();
+    const sel = document.getElementById("branchKeySelect");
+    sel.value = branchKey || "n8n";
+    setBranchModalFields(sel.value);
+    openModal("modalBranch");
+  }
+
+  function setBranchModalFields(branchKey){
+    const b = state.branches[branchKey];
+    (function(){
+      const sel = document.getElementById("branchStatusSelect");
+      if(!sel) return;
+      const current = String(b.status || "").trim();
+
+      const base = [
+        "Planned",
+        "In Development",
+        "In Progress",
+        "Testing",
+        "Active",
+        "On Hold",
+        "Blocked",
+        "Done"
+      ];
+
+      sel.innerHTML = "";
+      const hasCurrent = current && base.some(v => v.toLowerCase() === current.toLowerCase());
+
+      // If current status is custom, include it at top so nothing gets lost.
+      if(current && !hasCurrent){
+        const opt = document.createElement("option");
+        opt.value = current;
+        opt.textContent = current + " (custom)";
+        sel.appendChild(opt);
+      }
+
+      for(const v of base){
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        sel.appendChild(opt);
+      }
+
+      // Default selection
+      sel.value = hasCurrent ? base.find(v => v.toLowerCase() === current.toLowerCase()) : (current || "In Progress");
+    })();
+    document.getElementById("branchProgressInput").value = clampInt(b.progress, 0, 100);
+    document.getElementById("branchCheckpointsInput").value = (b.checkpoints || []).join("\n");
+  }
+
+  function saveBranchFromModal(){
+    const key = document.getElementById("branchKeySelect").value;
+    const statusText = String(document.getElementById("branchStatusSelect").value || "").trim();
+    const progress = clampInt(document.getElementById("branchProgressInput").value, 0, 100);
+    const lines = String(document.getElementById("branchCheckpointsInput").value || "")
+      .split("\n")
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    state.branches[key].status = statusText || state.branches[key].status;
+    state.branches[key].progress = progress;
+    state.branches[key].checkpoints = lines;
+
+    state.updatedAt = new Date().toISOString();
+
+    saveState();
+    renderAll();
+    closeModal("modalBranch");
+  }
+
+  function openImportModal(){
+    document.getElementById("importTextarea").value = "";
+    const errEl = document.getElementById("importErr");
+    errEl.style.display = "none";
+    errEl.textContent = "";
+    openModal("modalImport");
+  }
+
+  function applyImport(){
+    const errEl = document.getElementById("importErr");
+    const txt = document.getElementById("importTextarea").value || "";
+    const parsed = safeJsonParse(txt);
+
+    if(!parsed || typeof parsed !== "object"){
+      errEl.textContent = "That doesn’t look like valid JSON. Paste the full status.json object.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    state = normalizeStatus(parsed);
+    saveState();
+    renderAll();
+    closeModal("modalImport");
+  }
+
+  async function loadRemote(){
+    const url = "https://brainit-consulting.github.io/tradepro-dashboard/status.json?ts=" + Date.now();
+    try{
+      const res = await fetch(url, { cache:"no-store" });
+      if(!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json();
+      state = normalizeStatus(json);
+      renderAll();
+      alert("Remote status.json loaded into the dashboard view. Click Save (Edit Overall/Branch) to persist locally, or Export to download it.");
+    }catch(e){
+      alert("Could not load remote status.json. If you’re testing locally, that’s normal.\n\nError: " + e.message);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadState();
+    renderAll();
+
+    document.getElementById("btnEditOverall").addEventListener("click", openOverallModal);
+    document.getElementById("btnEditBranch").addEventListener("click", () => openBranchModal("n8n"));
+    document.getElementById("btnImport").addEventListener("click", openImportModal);
+    document.getElementById("btnExport").addEventListener("click", () => {
+      const exportObj = JSON.parse(JSON.stringify(state));
+      exportObj.updatedAt = new Date().toISOString();
+      downloadText("status.json", JSON.stringify(exportObj, null, 2));
+    });
+    document.getElementById("btnRefreshRemote").addEventListener("click", loadRemote);
+    document.getElementById("btnResetLocal").addEventListener("click", () => {
+      if(confirm("Reset local edits? This clears browser-saved changes and reloads defaults.")){
+        resetLocal();
+      }
+    });
+
+    document.getElementById("overallSaveBtn").addEventListener("click", saveOverallFromModal);
+    document.getElementById("branchSaveBtn").addEventListener("click", saveBranchFromModal);
+
+    document.getElementById("branchKeySelect").addEventListener("change", (e) => {
+      setBranchModalFields(e.target.value);
+    });
+
+    document.getElementById("importApplyBtn").addEventListener("click", applyImport);
+  });
+
+  window.__tpb_init = function(){
+    loadState();
+    renderAll();
+  };
+  </script>
+
+  <script>
+  // keep password + behavior exactly
+  (function(){
+    const PASSWORD = "tradeprobuddy";
+    const gateOverlay = document.getElementById("gateOverlay");
+    const app = document.getElementById("app");
+    const input = document.getElementById("gateInput");
+    const btn = document.getElementById("gateBtn");
+    const err = document.getElementById("gateErr");
+
+    function unlock(){
+      const v = String(input.value || "").trim();
+      if (v === PASSWORD){
+        gateOverlay.style.display = "none";
+        app.style.display = "block";
+        try{ localStorage.setItem("tpb_dash_ok","1"); }catch(e){}
+        try{ window.__tpb_init && window.__tpb_init(); }catch(e){}
+      }else{
+        err.style.display = "block";
+        input.focus();
+        input.select();
+      }
+    }
+
+    btn.addEventListener("click", unlock);
+    input.addEventListener("keydown", (e)=>{ if (e.key === "Enter") unlock(); });
+
+    try{
+      if (localStorage.getItem("tpb_dash_ok") === "1"){
+        gateOverlay.style.display = "none";
+        app.style.display = "block";
+        try{ window.__tpb_init && window.__tpb_init(); }catch(e){}
+      }else{
+        input.focus();
+      }
+    }catch(e){
+      input.focus();
+    }
+  })();
+  </script>
+</body>
+</html>
