@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2025-12-13T19:37:05.803Z",
+  "updatedAt": "2025-12-13T19:41:36.977Z",
   "overall": {
     "badge": "In Progress",
-    "headline": "Dashboard is now wired for auto updates.",
-    "notes": "DEBUGGING THE SAVE TO JSON TO GITHUB",
-    "summary": "JSON TO GITBUB TEST..."
+    "headline": "The Roofer App now has Vision AI!",
+    "notes": "Trade-specific forms and connected workflows that turn job requests into organized estimates, follow-ups, and reports. Built for Roofers, Plumbers, and Electricians — with your branding and process. We make it easy to fill-out tedious forms with the help of an AI assistant that turns forms into conversations. Free Trial!",
+    "summary": "Smarter Automations for Trade Professionals"
   },
   "branches": {
     "n8n": {
@@ -15,11 +15,9 @@
       ]
     },
     "forms": {
-      "status": "In Development",
-      "progress": 50,
-      "checkpoints": [
-        "Roofers - Roofer App & Estimate Workflow\nPlumbers - Service Request → Job Ticket → Estimate\nElectricians - Safety Checks, Reports & Quote Automation"
-      ]
+      "status": "In Progress",
+      "progress": 75,
+      "checkpoints": []
     },
     "reports": {
       "status": "Active",
