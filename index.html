@@ -510,7 +510,7 @@
             <button class="btn" id="btnEditBranch" type="button">🧩 Edit a Branch</button>
             <button class="btn" id="btnImport" type="button">⬇️ Import JSON</button>
             <button class="btn" id="btnExport" type="button">⬆️ Export status.json</button>
-            <button class="btn" id="btnRefreshRemote" type="button" title="Loads from the remote status.json (does not overwrite until you Save)">🔄 Load Remote</button>
+            <button class="btn" id="btnRefreshRemote" type="button" title="Loads status.json next to this page. Override with ?statusUrl=https://.../status.json">🔄 Load Remote</button>
             <button class="btn danger" id="btnResetLocal" type="button" title="Clears local saved edits and reloads the default data">🧹 Reset Local</button>
           </div>
 
@@ -685,9 +685,7 @@
         </div>
         <div class="field">
           <div class="label">Status</div>
-          <select class="select" id="branchStatusSelect" aria-label="Branch status">
-            <!-- options inserted by JS -->
-          </select>
+          <input class="input" id="branchStatusInput" placeholder="In Progress / Active / Planned" />
         </div>
         <div class="field">
           <div class="label">Progress (0–100)</div>
@@ -1078,50 +1076,14 @@
 
   function setBranchModalFields(branchKey){
     const b = state.branches[branchKey];
-    (function(){
-      const sel = document.getElementById("branchStatusSelect");
-      if(!sel) return;
-      const current = String(b.status || "").trim();
-
-      const base = [
-        "Planned",
-        "In Development",
-        "In Progress",
-        "Testing",
-        "Active",
-        "On Hold",
-        "Blocked",
-        "Done"
-      ];
-
-      sel.innerHTML = "";
-      const hasCurrent = current && base.some(v => v.toLowerCase() === current.toLowerCase());
-
-      // If current status is custom, include it at top so nothing gets lost.
-      if(current && !hasCurrent){
-        const opt = document.createElement("option");
-        opt.value = current;
-        opt.textContent = current + " (custom)";
-        sel.appendChild(opt);
-      }
-
-      for(const v of base){
-        const opt = document.createElement("option");
-        opt.value = v;
-        opt.textContent = v;
-        sel.appendChild(opt);
-      }
-
-      // Default selection
-      sel.value = hasCurrent ? base.find(v => v.toLowerCase() === current.toLowerCase()) : (current || "In Progress");
-    })();
+    document.getElementById("branchStatusInput").value = b.status || "";
     document.getElementById("branchProgressInput").value = clampInt(b.progress, 0, 100);
     document.getElementById("branchCheckpointsInput").value = (b.checkpoints || []).join("\n");
   }
 
   function saveBranchFromModal(){
     const key = document.getElementById("branchKeySelect").value;
-    const statusText = String(document.getElementById("branchStatusSelect").value || "").trim();
+    const statusText = String(document.getElementById("branchStatusInput").value || "").trim();
     const progress = clampInt(document.getElementById("branchProgressInput").value, 0, 100);
     const lines = String(document.getElementById("branchCheckpointsInput").value || "")
       .split("\n")
@@ -1165,17 +1127,57 @@
   }
 
   async function loadRemote(){
-    const url = "https://brainit-consulting.github.io/tradepro-dashboard/status.json?ts=" + Date.now();
+    // Default: load a status.json that sits next to this dashboard.html
+    // Override: add ?statusUrl=https://example.com/status.json
+    const params = new URLSearchParams(window.location.search || "");
+    const override = params.get("statusUrl");
+
+    const defaultUrl = new URL("status.json", window.location.href).toString();
+    const url = (override && override.startsWith("http")) ? override : defaultUrl;
+
     try{
-      const res = await fetch(url, { cache:"no-store" });
-      if(!res.ok) throw new Error("HTTP " + res.status);
+      const res = await fetch(url + (url.includes("?") ? "&" : "?") + "ts=" + Date.now(), { cache:"no-store" });
+      if(!res.ok) throw new Error("HTTP " + res.status + " at " + url);
       const json = await res.json();
       state = normalizeStatus(json);
       renderAll();
-      alert("Remote status.json loaded into the dashboard view. Click Save (Edit Overall/Branch) to persist locally, or Export to download it.");
+
+      try{ console.log("[Dashboard] Remote loaded:", url); }catch(e){}
+      if(!isInNotionIframe()){
+        alert("Remote status.json loaded from:
+" + url + "
+
+Tip: click Save (Edit Overall/Branch) to persist locally, or Export to download it.");
+      }
     }catch(e){
-      alert("Could not load remote status.json. If you’re testing locally, that’s normal.\n\nError: " + e.message);
+      const msg =
+        "Could not load remote status.json.
+
+" +
+        "Tried:
+" + url + "
+
+" +
+        "Common causes:
+" +
+        "• status.json is not in the same folder as dashboard.html
+" +
+        "• GitHub Pages not enabled / wrong branch or folder
+" +
+        "• File name is different (must be exactly status.json)
+" +
+        "• 404/403 due to repo settings
+
+" +
+        "Error: " + e.message;
+
+      try{ console.error("[Dashboard] Remote load failed:", e); }catch(_){}
+      alert(msg);
     }
+  }
+
+  function isInNotionIframe(){
+    try{ return window.self !== window.top; }catch(e){ return true; }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
