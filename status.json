@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2025-12-13T16:45:04.204Z",
+  "updatedAt": "2025-12-13T16:55:17.138Z",
   "overall": {
     "badge": "In Progress",
     "headline": "Dashboard is now wired for auto updates.",
-    "notes": "Next: connect n8n to publish status.json automatically. create form",
-    "summary": "replace jotform with n8n form"
+    "notes": "DEBUGGING THE SAVE TO JSON TO GITHUB",
+    "summary": "JSON TO GITBUB TEST"
   },
   "branches": {
     "n8n": {
