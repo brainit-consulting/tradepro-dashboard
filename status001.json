@@ -1,0 +1,36 @@
+{
+  "updatedAt": "2025-12-13T15:04:00.531Z",
+  "overall": {
+    "badge": "In Progress",
+    "headline": "Dashboard is now wired for auto updates.",
+    "notes": "Next: connect n8n to publish status.json automatically. create form",
+    "summary": "replace jotform with n8n form"
+  },
+  "branches": {
+    "n8n": {
+      "status": "In Progress",
+      "progress": 82,
+      "checkpoints": []
+    },
+    "forms": {
+      "status": "In Progress",
+      "progress": 75,
+      "checkpoints": []
+    },
+    "reports": {
+      "status": "Active",
+      "progress": 85,
+      "checkpoints": []
+    },
+    "website": {
+      "status": "In Progress",
+      "progress": 95,
+      "checkpoints": []
+    },
+    "architecture": {
+      "status": "Planned",
+      "progress": 50,
+      "checkpoints": []
+    }
+  }
+}
