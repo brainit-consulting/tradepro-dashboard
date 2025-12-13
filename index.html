@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TradeProBuddy - Interactive Project Dashboard</title>
   <meta name="color-scheme" content="dark light" />
+  <!-- Best-effort cache hints (doesn't override all hosting/browser caching, but helps) -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <style>
     :root{
       --bg:#0b1220;
@@ -314,7 +318,7 @@
         <p class="h-sub">Live view + editable data (saved to your browser, exportable as <code>status.json</code>).</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
-          <span class="pill"><b>Updated:</b> <span id="updatedAt">-</span></span>
+          <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
@@ -328,6 +332,7 @@
       <button class="btn" type="button" id="btnEditBranch">Edit a Branch</button>
       <button class="btn" type="button" id="btnImport">Import JSON</button>
       <button class="btn" type="button" id="btnExport">Export status.json</button>
+      <button class="btn" type="button" id="btnSaveGithub">Save to GitHub</button>
       <button class="btn" type="button" id="btnLoadRemote">Load Remote</button>
       <button class="btn danger" type="button" id="btnResetLocal">Reset Local</button>
     </div>
@@ -479,7 +484,6 @@
     </div>
   </div>
 
-  
   <div class="overlay" id="ovExport" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="mh">
@@ -504,6 +508,53 @@
     </div>
   </div>
 
+  <div class="overlay" id="ovPublish" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Save to GitHub (via n8n)</h3>
+          <p>This posts your current dashboard JSON to an n8n webhook that commits <code>status.json</code>.</p>
+        </div>
+        <button class="x" type="button" data-close="ovPublish">x</button>
+      </div>
+      <div class="mb">
+        <div class="form two">
+          <div style="grid-column:1/-1">
+            <label for="pubUrl">n8n Webhook URL</label>
+            <input id="pubUrl" placeholder="https://n8n.yourdomain.com/webhook/xxxxx" />
+          </div>
+          <div>
+            <label for="pubAuthType">Auth type (optional)</label>
+            <select id="pubAuthType">
+              <option value="none">None</option>
+              <option value="bearer">Bearer token</option>
+              <option value="xapikey">X-API-Key header</option>
+            </select>
+          </div>
+          <div>
+            <label for="pubToken">Token / Key (optional)</label>
+            <input id="pubToken" placeholder="leave blank if none" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="pubFilePath">Target file path in repo</label>
+            <input id="pubFilePath" value="status.json" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="pubCommitMsg">Commit message</label>
+            <input id="pubCommitMsg" value="Update status.json (dashboard)" />
+          </div>
+        </div>
+        <div class="foot" style="margin-top:10px">
+          Note: the webhook must send CORS headers (<code>Access-Control-Allow-Origin</code>) so this page can call it from your website.
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="pubSave">Save Settings</button>
+        <button class="btn primary" type="button" id="pubSend">Send Now</button>
+        <button class="btn" type="button" data-close="ovPublish">Close</button>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite">
     <div class="t" id="toastTitle">-</div>
@@ -514,6 +565,12 @@
     const STORAGE_KEY = "tpb_status_v1";
     const MODE_KEY = "tpb_mode_v1";
     const PASS_KEY = "tpb_gate_ok_v1";
+
+    const TPB_PUBLISH_URL = "tpb_publish_url_v1";
+    const TPB_PUBLISH_AUTH = "tpb_publish_auth_v1";
+    const TPB_PUBLISH_TOKEN = "tpb_publish_token_v1";
+    const TPB_PUBLISH_PATH = "tpb_publish_path_v1";
+    const TPB_PUBLISH_MSG = "tpb_publish_msg_v1";
 
     // IMPORTANT: change this to your own passcode
     const PASSCODE = "tradepro";
@@ -600,20 +657,39 @@
         .replace(/'/g,"&#039;");
     }
 
+    function formatUpdatedAt(iso){
+      if(!iso) return { text:"-", title:"" };
+      const d = new Date(iso);
+      if(isNaN(d.getTime())) return { text: String(iso), title: "" };
+
+      // Local display (your browser's timezone). Title keeps the raw ISO.
+      const text = d.toLocaleString(undefined, {
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        timeZoneName: "short"
+      });
+      return { text, title: "ISO (UTC stored): " + iso };
+    }
+
     function render(){
-      $("updatedAt").textContent = STATE.updatedAt || "-";
+      const f = formatUpdatedAt(STATE.updatedAt);
+      const updEl = $("updatedAt");
+      updEl.textContent = f.text;
+      if(f.title) updEl.parentElement.title = f.title;
+
       $("overallBadge").textContent = STATE.overall.badge || "-";
       $("overallBadge2").textContent = STATE.overall.badge || "-";
       $("overallHeadline").textContent = STATE.overall.headline || "-";
       $("overallNotes").textContent = STATE.overall.notes || "-";
 
-      // Option D — Overall roll-up progress (average of branch progress)
+      // Overall roll-up progress (average of branch progress)
       (function(){
         const vals = Object.values(STATE.branches || {}).map(b => clamp(Number((b && b.progress) || 0), 0, 100));
         const avg = vals.length ? Math.round(vals.reduce((a,c)=>a+c,0) / vals.length) : 0;
         const el = $("overallProgress");
         if(el) el.textContent = "Overall progress: " + avg + "%";
       })();
+
       const sum = (STATE.overall.summary || "").trim();
       $("overallSummary").textContent = sum || "-";
       const pill = $("overallSummaryPill");
@@ -711,7 +787,7 @@
       });
       document.addEventListener("keydown", (e) => {
         if(e.key === "Escape"){
-          ["ovOverall","ovBranch","ovImport"].forEach(id => $(id).classList.remove("show"));
+          ["ovOverall","ovBranch","ovImport","ovExport","ovPublish"].forEach(id => $(id).classList.remove("show"));
         }
       });
     }
@@ -731,16 +807,19 @@
       $("bCkpts").value = (b.checkpoints || []).join("\\n");
     }
 
-    async function loadRemote(){
-      const url = "./status.json?cb=" + Date.now();
-      const res = await fetch(url, { cache: "no-store" });
+    async function loadRemote(silent=false){
+      // Cache-bust and force network (best-effort). GitHub Pages can still take time to serve the new file after commit.
+      const url = new URL("status.json", window.location.href);
+      url.searchParams.set("cb", String(Date.now()));
+
+      const res = await fetch(url.toString(), { cache: "no-store" });
       if(!res.ok) throw new Error("Fetch failed: " + res.status);
       const raw = await res.json();
       STATE = normalizeData(raw);
       setLocal(STATE);
       setMode("remote");
       render();
-      toast("Loaded remote", "Pulled ./status.json and refreshed the dashboard.");
+      if(!silent) toast("Loaded remote", "Pulled status.json and refreshed the dashboard.");
     }
 
     function exportJson(){
@@ -776,6 +855,67 @@
       }
     }
 
+    function loadPublishSettings(){
+      $("pubUrl").value = localStorage.getItem(TPB_PUBLISH_URL) || "";
+      $("pubAuthType").value = localStorage.getItem(TPB_PUBLISH_AUTH) || "none";
+      $("pubToken").value = localStorage.getItem(TPB_PUBLISH_TOKEN) || "";
+      $("pubFilePath").value = localStorage.getItem(TPB_PUBLISH_PATH) || "status.json";
+      $("pubCommitMsg").value = localStorage.getItem(TPB_PUBLISH_MSG) || "Update status.json (dashboard)";
+    }
+
+    function savePublishSettings(){
+      localStorage.setItem(TPB_PUBLISH_URL, ($("pubUrl").value || "").trim());
+      localStorage.setItem(TPB_PUBLISH_AUTH, $("pubAuthType").value || "none");
+      localStorage.setItem(TPB_PUBLISH_TOKEN, ($("pubToken").value || "").trim());
+      localStorage.setItem(TPB_PUBLISH_PATH, ($("pubFilePath").value || "status.json").trim());
+      localStorage.setItem(TPB_PUBLISH_MSG, ($("pubCommitMsg").value || "").trim());
+    }
+
+    async function publishToN8n(){
+      const url = ($("pubUrl").value || "").trim();
+      if(!url){
+        toast("Missing webhook URL", "Paste your n8n webhook URL first.");
+        return;
+      }
+
+      savePublishSettings();
+
+      const authType = $("pubAuthType").value || "none";
+      const token = ($("pubToken").value || "").trim();
+      const payload = {
+        filePath: ($("pubFilePath").value || "status.json").trim(),
+        commitMessage: ($("pubCommitMsg").value || "Update status.json (dashboard)").trim(),
+        status: STATE
+      };
+
+      const headers = { "Content-Type": "application/json" };
+      if(authType === "bearer" && token) headers["Authorization"] = "Bearer " + token;
+      if(authType === "xapikey" && token) headers["X-API-Key"] = token;
+
+      toast("Sending…", "Posting dashboard JSON to n8n…");
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+        cache: "no-store"
+      });
+
+      const text = await res.text().catch(()=> "");
+      if(!res.ok){
+        console.error("[Dashboard] publish failed", res.status, text);
+        toast("Save failed", "Webhook returned " + res.status + ". Check console.");
+        return;
+      }
+
+      toast("Saved", "n8n accepted the update. GitHub Pages may take a moment to serve the new status.json.");
+      closeOverlay("ovPublish");
+
+      // Optional: attempt a silent refresh shortly after save (best-effort)
+      setTimeout(async () => {
+        try{ await loadRemote(true); }catch(e){ /* ignore */ }
+      }, 2500);
+    }
 
     function init(){
       $("btnAbout").addEventListener("click", () => {
@@ -787,6 +927,10 @@
       $("btnEditBranch").addEventListener("click", () => { fillBranchForm($("bKey").value || "n8n"); openOverlay("ovBranch"); });
       $("btnImport").addEventListener("click", () => { $("importJson").value = ""; openOverlay("ovImport"); });
       $("btnExport").addEventListener("click", exportJson);
+
+      $("btnSaveGithub").addEventListener("click", () => { loadPublishSettings(); openOverlay("ovPublish"); });
+      $("pubSave").addEventListener("click", () => { savePublishSettings(); toast("Saved", "Publish settings saved locally."); });
+      $("pubSend").addEventListener("click", async () => { try{ await publishToN8n(); } catch(e){ console.error(e); toast("Save failed", "Check console for details."); } });
 
       // Export fallback controls (helps in embedded contexts that block downloads)
       $("copyExport").addEventListener("click", async () => {
@@ -812,12 +956,11 @@
         window.open(dataUrl, "_blank", "noopener,noreferrer");
       });
 
-
       $("btnLoadRemote").addEventListener("click", async () => {
-        try { await loadRemote(); }
+        try { await loadRemote(false); }
         catch(e){
           setMode("local");
-          toast("Load remote failed", "Could not load ./status.json. Check browser console.");
+          toast("Load remote failed", "Could not load status.json yet. Try again in a moment.");
           console.error(e);
         }
       });
@@ -877,6 +1020,11 @@
       if(local) STATE = local;
       render();
       fillBranchForm("n8n");
+
+      // If the user previously switched to Remote mode, refresh remote on page load (best-effort).
+      if(getMode() === "remote"){
+        loadRemote(true).catch(()=>{ /* ignore */ });
+      }
     }
 
     function unlock(){
