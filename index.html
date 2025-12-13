@@ -55,7 +55,17 @@
     }
     header > *{position:relative;z-index:1}
     .h-title{margin:0;font-size:1.25rem;letter-spacing:.2px}
-    .h-sub{margin:6px 0 0;color:var(--muted);max-width:58ch;line-height:1.35}
+      .h-sub{
+        margin:6px 0 0;
+        color:var(--muted);
+        max-width:none;        /* remove width constraint */
+        white-space:nowrap;    /* prevent wrapping */
+        overflow:hidden;
+        text-overflow:ellipsis; /* safety for small screens */
+        display: block;
+        min-width: 0;
+      }
+
     .pill{
       display:inline-flex;align-items:center;gap:8px;
       padding:8px 12px;border-radius:999px;
@@ -72,7 +82,14 @@
       border:1px solid var(--line);
       background:rgba(123,63,160,.12);
       color:var(--ink);
-      font-size:.9rem;
+      font-size:.9rem;      
+    }
+    .build-version{
+      margin-left:8px;
+      font-size:0.85rem;
+      color:var(--accent);
+      font-weight:650;
+      white-space:nowrap;
     }
     .dot{
       width:10px;height:10px;border-radius:50%;
@@ -313,9 +330,11 @@
 
   <div class="wrap" id="app">
     <header>
-      <div>
+      <div style="min-width: 0;">
         <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
-        <p class="h-sub">Live view + editable data (saved to your browser, exportable as <code>status.json</code>).</p>
+        <p class="h-sub">Live view + editable data (saved to your browser, exportable as <code>status.json</code>).
+        <span class="build-version">• Build: V006</span>
+        </p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
