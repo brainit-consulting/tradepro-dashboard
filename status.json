@@ -10,7 +10,7 @@
       "status": "In Progress",
       "progress": 82,
       "checkpoints": [
-        "Build prototype jotform submission to upload to webhook then to gitbhub**beta"
+        "Build prototype jotform submission to upload to webhook then to gitbhub**alpha**buggy"
         "Global router to subflows handoff confirmed",
         "Electrical branch end-to-end test run succeeded",
         "Email hardening added to prevent empty addresses from failing runs",
