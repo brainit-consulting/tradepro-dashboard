@@ -621,7 +621,26 @@
       </div>
     </div>
 
-    <footer>
+    
+    <div id="toast" style="
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%);
+      z-index:9997;
+      display:none;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(2,6,23,.78);
+      color:rgba(226,232,240,.92);
+      box-shadow:0 18px 60px rgba(0,0,0,.35);
+      max-width:min(720px, 92vw);
+      font-weight:800;
+      font-size:.92rem;
+    "></div>
+
+<footer>
       © 2025 BrainIT Consulting • TradeProBuddy™ Internal Dashboard
     </footer>
   </div>
@@ -1002,6 +1021,16 @@
 
   function escapeHtml(s){
     return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+
+  function showToast(text, ms=2600){
+    const el = document.getElementById("toast");
+    if(!el) return;
+    el.textContent = text;
+    el.style.display = "block";
+    clearTimeout(el.__t);
+    el.__t = setTimeout(()=>{ el.style.display="none"; }, ms);
   }
 
   // =========================================================
