@@ -479,6 +479,32 @@
     </div>
   </div>
 
+  
+  <div class="overlay" id="ovExport" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Export status.json</h3>
+          <p>If downloads are blocked inside an embedded frame, use Copy instead.</p>
+        </div>
+        <button class="x" type="button" data-close="ovExport">x</button>
+      </div>
+      <div class="mb">
+        <label for="exportJsonText">JSON (copy/paste)</label>
+        <textarea id="exportJsonText" spellcheck="false" style="min-height:320px"></textarea>
+        <div class="foot" style="margin-top:10px">
+          Tip: paste this into <code>status.json</code> in GitHub and commit.
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="copyExport">Copy JSON</button>
+        <button class="btn" type="button" id="openExportTab">Open in new tab</button>
+        <button class="btn" type="button" data-close="ovExport">Close</button>
+      </div>
+    </div>
+  </div>
+
+
   <div class="toast" id="toast" role="status" aria-live="polite">
     <div class="t" id="toastTitle">-</div>
     <div class="m" id="toastMsg">-</div>
@@ -718,15 +744,38 @@
     }
 
     function exportJson(){
-      const blob = new Blob([JSON.stringify(STATE, null, 2)], { type:"application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "status.json";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-      toast("Exported", "Downloaded status.json");
+      const jsonText = JSON.stringify(STATE, null, 2);
+
+      // Primary: download via Blob (works in most top-level contexts)
+      try{
+        const blob = new Blob([jsonText], { type:"application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "status.json";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+        toast("Exported", "Downloaded status.json");
+        return;
+      }catch(e){
+        console.warn("[Dashboard] Download blocked, falling back to copy/export modal.", e);
+      }
+
+      // Fallback: show JSON + Copy (works even when downloads are blocked in embeds)
+      try{
+        const ta = $("exportJsonText");
+        if(ta) ta.value = jsonText;
+        openOverlay("ovExport");
+        toast("Export fallback", "Downloads blocked here. Use Copy JSON.");
+      }catch(e2){
+        // Last resort: open in new tab as data URL
+        try{
+          const dataUrl = "data:application/json;charset=utf-8," + encodeURIComponent(jsonText);
+          window.open(dataUrl, "_blank", "noopener,noreferrer");
+        }catch(_){}
+      }
     }
+
 
     function init(){
       $("btnAbout").addEventListener("click", () => {
@@ -738,6 +787,31 @@
       $("btnEditBranch").addEventListener("click", () => { fillBranchForm($("bKey").value || "n8n"); openOverlay("ovBranch"); });
       $("btnImport").addEventListener("click", () => { $("importJson").value = ""; openOverlay("ovImport"); });
       $("btnExport").addEventListener("click", exportJson);
+
+      // Export fallback controls (helps in embedded contexts that block downloads)
+      $("copyExport").addEventListener("click", async () => {
+        const text = ($("exportJsonText").value || "");
+        if(!text.trim()){
+          toast("Nothing to copy", "Export JSON is empty.");
+          return;
+        }
+        try{
+          await navigator.clipboard.writeText(text);
+          toast("Copied", "status.json copied to clipboard.");
+        }catch(e){
+          const ta = $("exportJsonText");
+          ta.focus();
+          ta.select();
+          toast("Copy blocked", "Press Ctrl+C to copy the selected JSON.");
+        }
+      });
+
+      $("openExportTab").addEventListener("click", () => {
+        const text = ($("exportJsonText").value || "");
+        const dataUrl = "data:application/json;charset=utf-8," + encodeURIComponent(text);
+        window.open(dataUrl, "_blank", "noopener,noreferrer");
+      });
+
 
       $("btnLoadRemote").addEventListener("click", async () => {
         try { await loadRemote(); }
