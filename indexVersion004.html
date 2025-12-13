@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TradeProBuddy - Interactive Project Dashboard</title>
+  <meta name="color-scheme" content="dark light" />
+  <!-- Best-effort cache hints (doesn't override all hosting/browser caching, but helps) -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#0f1b33;
+      --card2:#0b1428;
+      --ink:#e5e7eb;
+      --muted:#9aa7bd;
+      --line:rgba(148,163,184,.18);
+      --accent:#34d399;
+      --accent2:#7b3fa0;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --ok:#22c55e;
+      --shadow:0 18px 55px rgba(0,0,0,.45);
+      --r:18px;
+      --r2:14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:radial-gradient(1200px 900px at 15% 0%, rgba(123,63,160,.22), transparent 50%),
+                 radial-gradient(1100px 800px at 90% 0%, rgba(52,211,153,.16), transparent 55%),
+                 linear-gradient(180deg, #070b15 0%, var(--bg) 100%);
+      color:var(--ink);
+      min-height:100vh;
+    }
+    a{color:inherit}
+    .wrap{max-width:1180px;margin:0 auto;padding:26px 16px 42px}
+    header{
+      display:flex;gap:14px;align-items:flex-start;justify-content:space-between;
+      padding:18px 18px 16px;border:1px solid var(--line);border-radius:var(--r);
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    header:before{
+      content:"";
+      position:absolute;inset:-1px;
+      background:radial-gradient(800px 260px at 25% 0%, rgba(52,211,153,.12), transparent 55%),
+                 radial-gradient(700px 240px at 80% 0%, rgba(123,63,160,.16), transparent 60%);
+      pointer-events:none;
+    }
+    header > *{position:relative;z-index:1}
+    .h-title{margin:0;font-size:1.25rem;letter-spacing:.2px}
+    .h-sub{margin:6px 0 0;color:var(--muted);max-width:58ch;line-height:1.35}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+      color:var(--ink);
+      font-size:.9rem;
+      white-space:nowrap;
+    }
+    .pill b{font-weight:650}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(123,63,160,.12);
+      color:var(--ink);
+      font-size:.9rem;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 0 3px rgba(52,211,153,.12);
+      flex:0 0 auto;
+    }
+    .toolbar{
+      display:flex;flex-wrap:wrap;gap:10px;
+      margin:14px 0 0;
+    }
+    .btn{
+      appearance:none;border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--ink);
+      padding:10px 12px;border-radius:14px;
+      cursor:pointer;
+      display:inline-flex;align-items:center;gap:8px;
+      font-weight:600;
+      transition:transform .08s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+      pointer-events:auto;
+    }
+    .btn:hover{background:rgba(255,255,255,.06);border-color:rgba(148,163,184,.28)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      border-color:rgba(52,211,153,.38);
+      background:linear-gradient(180deg, rgba(52,211,153,.18), rgba(52,211,153,.08));
+    }
+    .btn.danger{
+      border-color:rgba(239,68,68,.35);
+      background:linear-gradient(180deg, rgba(239,68,68,.18), rgba(239,68,68,.08));
+    }
+    .btn.small{padding:8px 10px;border-radius:12px;font-weight:650}
+    .grid{
+      display:grid;gap:14px;margin-top:16px;
+      grid-template-columns:repeat(12,1fr);
+    }
+    .card{
+      grid-column:span 12;
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.018));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px;border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:rgba(0,0,0,.15);
+    }
+    .card .hd h2{margin:0;font-size:1rem}
+    .card .bd{padding:14px 16px}
+    .kpis{
+      display:grid;gap:12px;margin-top:12px;
+      grid-template-columns:repeat(12,1fr);
+    }
+    .kpi{
+      grid-column:span 12;
+      border:1px solid var(--line);
+      border-radius:var(--r2);
+      background:rgba(0,0,0,.16);
+      padding:12px 12px 11px;
+    }
+    .kpi .label{color:var(--muted);font-size:.85rem;margin:0 0 6px}
+    .kpi .value{margin:0;font-size:1.05rem;font-weight:700;line-height:1.2}
+    .kpi .sub{margin:6px 0 0;color:var(--muted);font-size:.9rem;line-height:1.35}
+    @media(min-width:860px){
+      .kpi{grid-column:span 4}
+    }
+    .tr{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr 110px;
+      gap:12px;
+      padding:12px 12px;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(0,0,0,.16);
+    }
+    .area{font-weight:750}
+    .status{color:var(--muted);font-weight:650}
+    .bar{
+      height:12px;border-radius:999px;
+      background:rgba(148,163,184,.12);
+      border:1px solid rgba(148,163,184,.14);
+      overflow:hidden;
+    }
+    .bar > i{
+      display:block;height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(52,211,153,.75), rgba(123,63,160,.70));
+    }
+    .ckpts{
+      margin:10px 0 0;
+      padding:0 0 0 18px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+    .ckpts li{margin:4px 0}
+    .foot{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:.9rem;
+      line-height:1.45;
+    }
+
+    /* Modal */
+    .overlay{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.55);
+      backdrop-filter: blur(10px) saturate(140%);
+      display:none;
+      align-items:center;justify-content:center;
+      padding:26px 14px;
+      z-index:1000;
+      pointer-events:auto;
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(980px, 96vw);
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      box-shadow:0 28px 80px rgba(0,0,0,.6);
+      overflow:hidden;
+    }
+    .modal .mh{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+      padding:16px 16px;border-bottom:1px solid rgba(148,163,184,.18);
+      background:rgba(0,0,0,.18);
+    }
+    .modal .mh h3{margin:0;font-size:1.05rem}
+    .modal .mh p{margin:6px 0 0;color:var(--muted);max-width:72ch}
+    .x{
+      appearance:none;border:1px solid rgba(148,163,184,.22);
+      background:rgba(0,0,0,.25);
+      color:var(--ink);
+      width:40px;height:40px;border-radius:14px;
+      cursor:pointer;
+      font-size:18px;font-weight:800;
+    }
+    .x:hover{background:rgba(0,0,0,.35)}
+    .modal .mb{padding:16px}
+    .form{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media(min-width:860px){ .form.two{grid-template-columns:1fr 1fr} }
+    label{display:block;font-size:.85rem;color:var(--muted);margin:0 0 6px}
+    input, textarea, select{
+      width:100%;
+      padding:11px 12px;
+      border-radius:14px;
+      border:1px solid rgba(148,163,184,.20);
+      background:rgba(0,0,0,.25);
+      color:var(--ink);
+      outline:none;
+    }
+    textarea{min-height:150px;resize:vertical;line-height:1.4}
+    input:focus, textarea:focus, select:focus{border-color:rgba(52,211,153,.45)}
+    .actions{
+      display:flex;gap:10px;flex-wrap:wrap;
+      justify-content:flex-end;
+      padding:14px 16px;
+      border-top:1px solid rgba(148,163,184,.18);
+      background:rgba(0,0,0,.14);
+    }
+    .toast{
+      position:fixed;
+      right:12px;bottom:12px;
+      max-width:min(520px, calc(100vw - 24px));
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(2,6,23,.92);
+      color:var(--ink);
+      box-shadow:0 20px 60px rgba(0,0,0,.55);
+      display:none;
+      z-index:2000;
+    }
+    .toast.show{display:block}
+    .toast .t{font-weight:750}
+    .toast .m{margin-top:6px;color:var(--muted);line-height:1.35}
+
+    /* Passcode gate */
+    #gate{
+      position:fixed;inset:0;
+      z-index:3000;
+      display:flex;
+      align-items:center;justify-content:center;
+      padding:34px 14px;
+      background:radial-gradient(900px 600px at 20% 0%, rgba(123,63,160,.25), transparent 58%),
+                 radial-gradient(900px 600px at 85% 0%, rgba(52,211,153,.18), transparent 60%),
+                 rgba(2,6,23,.92);
+      backdrop-filter: blur(12px) saturate(160%);
+      pointer-events:auto;
+    }
+    .gate-card{
+      width:min(560px, 96vw);
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:22px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      box-shadow:0 30px 90px rgba(0,0,0,.65);
+      overflow:hidden;
+    }
+    .gate-card .top{padding:16px 16px;border-bottom:1px solid rgba(148,163,184,.18)}
+    .gate-card h2{margin:0;font-size:1.1rem}
+    .gate-card p{margin:8px 0 0;color:var(--muted);line-height:1.4}
+    .gate-card .mid{padding:16px}
+    .gate-row{display:flex;gap:10px;align-items:center}
+    .gate-row input{flex:1}
+    .err{margin-top:10px;color:#fecaca;display:none}
+    .err.show{display:block}
+    .hint{margin-top:12px;color:var(--muted);font-size:.9rem}
+  </style>
+</head>
+
+<body>
+  <div id="gate" aria-modal="true" role="dialog">
+    <div class="gate-card">
+      <div class="top">
+        <h2>TradeProBuddy Dashboard</h2>
+        <p><span class="dot"></span> Protected view</p>
+      </div>
+      <div class="mid">
+        <label for="gateCode">Enter passcode</label>
+        <div class="gate-row">
+          <input id="gateCode" type="password" autocomplete="current-password" placeholder="Passcode" />
+          <button id="gateBtn" class="btn primary" type="button">Unlock</button>
+        </div>
+        <div id="gateErr" class="err">Incorrect passcode. Try again.</div>
+        <div class="hint">Tip: this is only front-end protection. For real security, keep the repo private or serve behind auth.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" id="app">
+    <header>
+      <div>
+        <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
+        <p class="h-sub">Live view + editable data (saved to your browser, exportable as <code>status.json</code>).</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
+          <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
+          <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
+        <span class="badge"><span class="dot"></span><span id="overallBadge">-</span></span>
+        <button class="btn small" type="button" id="btnAbout">How this works</button>
+      </div>
+    </header>
+
+    <div class="toolbar" aria-label="Dashboard actions">
+      <button class="btn primary" type="button" id="btnEditOverall">Edit Overall</button>
+      <button class="btn" type="button" id="btnEditBranch">Edit a Branch</button>
+      <button class="btn" type="button" id="btnImport">Import JSON</button>
+      <button class="btn" type="button" id="btnExport">Export status.json</button>
+      <button class="btn" type="button" id="btnSaveGithub">Save to GitHub</button>
+      <button class="btn" type="button" id="btnLoadRemote">Load Remote</button>
+      <button class="btn danger" type="button" id="btnResetLocal">Reset Local</button>
+    </div>
+
+    <div class="foot" id="howItWorks" style="display:none">
+      <b>How this works:</b> edits save to <code>localStorage</code> in your browser (private to your device). Use <b>Export</b> to download a <code>status.json</code> you can publish from n8n/GitHub. Use <b>Load Remote</b> to pull <code>./status.json</code> from this site.
+    </div>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="overallTitle">
+        <div class="hd">
+          <h2 id="overallTitle">Overall Status</h2>
+          <span class="pill" id="overallSummaryPill" style="display:none"></span>
+        </div>
+        <div class="bd">
+          <div class="kpis">
+            <div class="kpi">
+              <p class="label">Headline</p>
+              <p class="value" id="overallHeadline">-</p>
+            </div>
+            <div class="kpi">
+              <p class="label">Notes</p>
+              <p class="value" style="font-size:1rem;font-weight:650" id="overallNotes">-</p>
+            </div>
+            <div class="kpi">
+              <p class="label">Rolling Forward</p>
+              <p class="value" id="overallBadge2">-</p>
+              <p class="sub" style="margin-top:10px" id="overallProgress">Overall progress: -</p>
+              <p class="sub" id="overallSummary">-</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="branchesTitle">
+        <div class="hd">
+          <h2 id="branchesTitle">Progress by Branch</h2>
+          <span class="pill" id="localModePill">Mode: <b>Local</b></span>
+        </div>
+        <div class="bd" id="branches"></div>
+      </section>
+    </div>
+
+    <div class="foot">© 2025 BrainIT Consulting • TradeProBuddy™ Internal Dashboard</div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="overlay" id="ovOverall" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Edit Overall</h3>
+          <p>Saves locally. Export to publish.</p>
+        </div>
+        <button class="x" type="button" data-close="ovOverall">x</button>
+      </div>
+      <div class="mb">
+        <div class="form two">
+          <div>
+            <label for="oBadge">Badge</label>
+            <input id="oBadge" />
+          </div>
+          <div>
+            <label for="oUpdatedAt">Updated At (ISO)</label>
+            <input id="oUpdatedAt" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="oHeadline">Headline</label>
+            <input id="oHeadline" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="oNotes">Notes</label>
+            <textarea id="oNotes"></textarea>
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="oSummary">Optional Summary (right-card pill)</label>
+            <input id="oSummary" />
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="saveOverall">Save</button>
+        <button class="btn" type="button" data-close="ovOverall">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="ovBranch" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Edit Branch</h3>
+          <p>Edit status / progress / checkpoints. Use one item per line.</p>
+        </div>
+        <button class="x" type="button" data-close="ovBranch">x</button>
+      </div>
+      <div class="mb">
+        <div class="form two">
+          <div>
+            <label for="bKey">Branch</label>
+            <select id="bKey"></select>
+          </div>
+          <div>
+            <label for="bStatus">Status</label>
+            <select id="bStatus">
+              <option>Planned</option>
+              <option>In Progress</option>
+              <option>Active</option>
+              <option>Paused</option>
+              <option>In Development</option>
+              <option>Blocked</option>
+              <option>Done</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="bProgress">Progress (0-100)</label>
+            <input id="bProgress" type="number" min="0" max="100" step="1" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="bCkpts">Checkpoints (one per line)</label>
+            <textarea id="bCkpts"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="saveBranch">Save</button>
+        <button class="btn" type="button" data-close="ovBranch">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="ovImport" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Import JSON</h3>
+          <p>Paste a status.json object here.</p>
+        </div>
+        <button class="x" type="button" data-close="ovImport">x</button>
+      </div>
+      <div class="mb">
+        <label for="importJson">JSON</label>
+        <textarea id="importJson" spellcheck="false"></textarea>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="applyImport">Apply + Save Local</button>
+        <button class="btn" type="button" data-close="ovImport">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="ovExport" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Export status.json</h3>
+          <p>If downloads are blocked inside an embedded frame, use Copy instead.</p>
+        </div>
+        <button class="x" type="button" data-close="ovExport">x</button>
+      </div>
+      <div class="mb">
+        <label for="exportJsonText">JSON (copy/paste)</label>
+        <textarea id="exportJsonText" spellcheck="false" style="min-height:320px"></textarea>
+        <div class="foot" style="margin-top:10px">
+          Tip: paste this into <code>status.json</code> in GitHub and commit.
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="copyExport">Copy JSON</button>
+        <button class="btn" type="button" id="openExportTab">Open in new tab</button>
+        <button class="btn" type="button" data-close="ovExport">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="ovPublish" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Save to GitHub (via n8n)</h3>
+          <p>This posts your current dashboard JSON to an n8n webhook that commits <code>status.json</code>.</p>
+        </div>
+        <button class="x" type="button" data-close="ovPublish">x</button>
+      </div>
+      <div class="mb">
+        <div class="form two">
+          <div style="grid-column:1/-1">
+            <label for="pubUrl">n8n Webhook URL</label>
+            <input id="pubUrl" placeholder="https://n8n.yourdomain.com/webhook/xxxxx" />
+          </div>
+          <div>
+            <label for="pubAuthType">Auth type (optional)</label>
+            <select id="pubAuthType">
+              <option value="none">None</option>
+              <option value="bearer">Bearer token</option>
+              <option value="xapikey">X-API-Key header</option>
+            </select>
+          </div>
+          <div>
+            <label for="pubToken">Token / Key (optional)</label>
+            <input id="pubToken" placeholder="leave blank if none" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="pubFilePath">Target file path in repo</label>
+            <input id="pubFilePath" value="status.json" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="pubCommitMsg">Commit message</label>
+            <input id="pubCommitMsg" value="Update status.json (dashboard)" />
+          </div>
+        </div>
+        <div class="foot" style="margin-top:10px">
+          Note: the webhook must send CORS headers (<code>Access-Control-Allow-Origin</code>) so this page can call it from your website.
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="pubSave">Save Settings</button>
+        <button class="btn primary" type="button" id="pubSend">Send Now</button>
+        <button class="btn" type="button" data-close="ovPublish">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="t" id="toastTitle">-</div>
+    <div class="m" id="toastMsg">-</div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "tpb_status_v1";
+    const MODE_KEY = "tpb_mode_v1";
+    const PASS_KEY = "tpb_gate_ok_v1";
+
+    const TPB_PUBLISH_URL = "tpb_publish_url_v1";
+    const TPB_PUBLISH_AUTH = "tpb_publish_auth_v1";
+    const TPB_PUBLISH_TOKEN = "tpb_publish_token_v1";
+    const TPB_PUBLISH_PATH = "tpb_publish_path_v1";
+    const TPB_PUBLISH_MSG = "tpb_publish_msg_v1";
+
+    // IMPORTANT: change this to your own passcode
+    const PASSCODE = "tradepro";
+
+    const DEFAULT_DATA = {
+      updatedAt: new Date().toISOString(),
+      overall: {
+        badge: "In Progress",
+        headline: "Dashboard is now wired for auto updates.",
+        notes: "Next: connect n8n to publish status.json automatically.",
+        summary: ""
+      },
+      branches: {
+        n8n: { status: "In Progress", progress: 82, checkpoints: [] },
+        forms: { status: "In Progress", progress: 75, checkpoints: [] },
+        reports: { status: "Active", progress: 85, checkpoints: [] },
+        website: { status: "In Progress", progress: 95, checkpoints: [] },
+        architecture: { status: "Planned", progress: 50, checkpoints: [] }
+      }
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const safeJSON = (s) => { try { return { ok:true, val: JSON.parse(s) }; } catch(e){ return { ok:false, err:e }; } };
+
+    function toast(title, msg){
+      $("toastTitle").textContent = title;
+      $("toastMsg").textContent = msg;
+      const t = $("toast");
+      t.classList.add("show");
+      clearTimeout(window.__tpb_toast_t);
+      window.__tpb_toast_t = setTimeout(()=>t.classList.remove("show"), 3200);
+    }
+
+    function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+
+    function normalizeData(raw){
+      const data = deepClone(DEFAULT_DATA);
+      if(raw && typeof raw === "object"){
+        if(typeof raw.updatedAt === "string") data.updatedAt = raw.updatedAt;
+        if(raw.overall && typeof raw.overall === "object"){
+          if(typeof raw.overall.badge === "string") data.overall.badge = raw.overall.badge;
+          if(typeof raw.overall.headline === "string") data.overall.headline = raw.overall.headline;
+          if(typeof raw.overall.notes === "string") data.overall.notes = raw.overall.notes;
+          if(typeof raw.overall.summary === "string") data.overall.summary = raw.overall.summary;
+        }
+        if(raw.branches && typeof raw.branches === "object"){
+          for(const k of Object.keys(data.branches)){
+            const b = raw.branches[k];
+            if(b && typeof b === "object"){
+              if(typeof b.status === "string") data.branches[k].status = b.status;
+              if(typeof b.progress === "number") data.branches[k].progress = clamp(Math.round(b.progress), 0, 100);
+              if(Array.isArray(b.checkpoints)) data.branches[k].checkpoints = b.checkpoints.map(x => String(x)).filter(Boolean);
+            }
+          }
+        }
+      }
+      return data;
+    }
+
+    function getLocal(){
+      const s = localStorage.getItem(STORAGE_KEY);
+      if(!s) return null;
+      const p = safeJSON(s);
+      if(!p.ok) return null;
+      return normalizeData(p.val);
+    }
+    function setLocal(data){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data, null, 2)); }
+
+    function getMode(){ return localStorage.getItem(MODE_KEY) || "local"; }
+    function setMode(mode){
+      localStorage.setItem(MODE_KEY, mode);
+      $("localModePill").innerHTML = "Mode: <b>" + (mode === "remote" ? "Remote" : "Local") + "</b>";
+    }
+
+    let STATE = normalizeData(getLocal() || DEFAULT_DATA);
+
+    function escapeHtml(s){
+      return String(s)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function formatUpdatedAt(iso){
+      if(!iso) return { text:"-", title:"" };
+      const d = new Date(iso);
+      if(isNaN(d.getTime())) return { text: String(iso), title: "" };
+
+      // Local display (your browser's timezone). Title keeps the raw ISO.
+      const text = d.toLocaleString(undefined, {
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit",
+        timeZoneName: "short"
+      });
+      return { text, title: "ISO (UTC stored): " + iso };
+    }
+
+    function render(){
+      const f = formatUpdatedAt(STATE.updatedAt);
+      const updEl = $("updatedAt");
+      updEl.textContent = f.text;
+      if(f.title) updEl.parentElement.title = f.title;
+
+      $("overallBadge").textContent = STATE.overall.badge || "-";
+      $("overallBadge2").textContent = STATE.overall.badge || "-";
+      $("overallHeadline").textContent = STATE.overall.headline || "-";
+      $("overallNotes").textContent = STATE.overall.notes || "-";
+
+      // Overall roll-up progress (average of branch progress)
+      (function(){
+        const vals = Object.values(STATE.branches || {}).map(b => clamp(Number((b && b.progress) || 0), 0, 100));
+        const avg = vals.length ? Math.round(vals.reduce((a,c)=>a+c,0) / vals.length) : 0;
+        const el = $("overallProgress");
+        if(el) el.textContent = "Overall progress: " + avg + "%";
+      })();
+
+      const sum = (STATE.overall.summary || "").trim();
+      $("overallSummary").textContent = sum || "-";
+      const pill = $("overallSummaryPill");
+      if(sum){
+        pill.style.display = "inline-flex";
+        pill.innerHTML = "Summary: <b>" + escapeHtml(sum) + "</b>";
+      }else{
+        pill.style.display = "none";
+      }
+
+      const rows = [
+        ["n8n", "n8n Workflows"],
+        ["forms", "Forms & Apps"],
+        ["reports", "Reports"],
+        ["website", "Website"],
+        ["architecture", "Architecture"]
+      ];
+
+      $("bKey").innerHTML = rows.map(([k,l]) => `<option value="${k}">${l}</option>`).join("");
+
+      const container = $("branches");
+      container.innerHTML = "";
+
+      for(const [key, label] of rows){
+        const b = STATE.branches[key];
+        const wrap = document.createElement("div");
+
+        const top = document.createElement("div");
+        top.className = "tr";
+
+        const left = document.createElement("div");
+        left.innerHTML = '<div class="area">' + escapeHtml(label) + '</div><div class="status">' + escapeHtml(b.status || "-") + '</div>';
+
+        const mid = document.createElement("div");
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        const i = document.createElement("i");
+        i.style.width = (clamp(b.progress||0,0,100)) + "%";
+        bar.appendChild(i);
+        mid.appendChild(bar);
+
+        const right = document.createElement("div");
+        right.style.textAlign = "right";
+        right.style.fontWeight = "800";
+        right.textContent = (clamp(b.progress||0,0,100)) + "%";
+
+        top.appendChild(left);
+        top.appendChild(mid);
+        top.appendChild(right);
+
+        const body = document.createElement("div");
+        body.style.padding = "0 12px 12px";
+
+        const h = document.createElement("div");
+        h.style.marginTop = "10px";
+        h.style.color = "var(--muted)";
+        h.style.fontWeight = "650";
+        h.textContent = "Current Checkpoints";
+        body.appendChild(h);
+
+        const ul = document.createElement("ul");
+        ul.className = "ckpts";
+        const c = Array.isArray(b.checkpoints) ? b.checkpoints : [];
+        if(c.length){
+          c.forEach(t => {
+            const li = document.createElement("li");
+            li.textContent = t;
+            ul.appendChild(li);
+          });
+        }else{
+          const li = document.createElement("li");
+          li.textContent = "-";
+          ul.appendChild(li);
+        }
+        body.appendChild(ul);
+
+        wrap.appendChild(top);
+        wrap.appendChild(body);
+        container.appendChild(wrap);
+      }
+
+      setMode(getMode());
+    }
+
+    function openOverlay(id){ $(id).classList.add("show"); }
+    function closeOverlay(id){ $(id).classList.remove("show"); }
+
+    function wireModalClose(){
+      document.addEventListener("click", (e) => {
+        const t = e.target;
+        if(!(t instanceof Element)) return;
+        const closeId = t.getAttribute("data-close");
+        if(closeId){ e.preventDefault(); closeOverlay(closeId); }
+        if(t.classList.contains("overlay")) t.classList.remove("show");
+      });
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape"){
+          ["ovOverall","ovBranch","ovImport","ovExport","ovPublish"].forEach(id => $(id).classList.remove("show"));
+        }
+      });
+    }
+
+    function fillOverallForm(){
+      $("oBadge").value = STATE.overall.badge || "";
+      $("oUpdatedAt").value = STATE.updatedAt || new Date().toISOString();
+      $("oHeadline").value = STATE.overall.headline || "";
+      $("oNotes").value = STATE.overall.notes || "";
+      $("oSummary").value = STATE.overall.summary || "";
+    }
+    function fillBranchForm(key){
+      const b = STATE.branches[key];
+      $("bKey").value = key;
+      $("bStatus").value = b.status || "In Progress";
+      $("bProgress").value = clamp(b.progress||0, 0, 100);
+      $("bCkpts").value = (b.checkpoints || []).join("\\n");
+    }
+
+    async function loadRemote(silent=false){
+      // Cache-bust and force network (best-effort). GitHub Pages can still take time to serve the new file after commit.
+      const url = new URL("status.json", window.location.href);
+      url.searchParams.set("cb", String(Date.now()));
+
+      const res = await fetch(url.toString(), { cache: "no-store" });
+      if(!res.ok) throw new Error("Fetch failed: " + res.status);
+      const raw = await res.json();
+      STATE = normalizeData(raw);
+      setLocal(STATE);
+      setMode("remote");
+      render();
+      if(!silent) toast("Loaded remote", "Pulled status.json and refreshed the dashboard.");
+    }
+
+    function exportJson(){
+      const jsonText = JSON.stringify(STATE, null, 2);
+
+      // Primary: download via Blob (works in most top-level contexts)
+      try{
+        const blob = new Blob([jsonText], { type:"application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "status.json";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+        toast("Exported", "Downloaded status.json");
+        return;
+      }catch(e){
+        console.warn("[Dashboard] Download blocked, falling back to copy/export modal.", e);
+      }
+
+      // Fallback: show JSON + Copy (works even when downloads are blocked in embeds)
+      try{
+        const ta = $("exportJsonText");
+        if(ta) ta.value = jsonText;
+        openOverlay("ovExport");
+        toast("Export fallback", "Downloads blocked here. Use Copy JSON.");
+      }catch(e2){
+        // Last resort: open in new tab as data URL
+        try{
+          const dataUrl = "data:application/json;charset=utf-8," + encodeURIComponent(jsonText);
+          window.open(dataUrl, "_blank", "noopener,noreferrer");
+        }catch(_){}
+      }
+    }
+
+    function loadPublishSettings(){
+      $("pubUrl").value = localStorage.getItem(TPB_PUBLISH_URL) || "";
+      $("pubAuthType").value = localStorage.getItem(TPB_PUBLISH_AUTH) || "none";
+      $("pubToken").value = localStorage.getItem(TPB_PUBLISH_TOKEN) || "";
+      $("pubFilePath").value = localStorage.getItem(TPB_PUBLISH_PATH) || "status.json";
+      $("pubCommitMsg").value = localStorage.getItem(TPB_PUBLISH_MSG) || "Update status.json (dashboard)";
+    }
+
+    function savePublishSettings(){
+      localStorage.setItem(TPB_PUBLISH_URL, ($("pubUrl").value || "").trim());
+      localStorage.setItem(TPB_PUBLISH_AUTH, $("pubAuthType").value || "none");
+      localStorage.setItem(TPB_PUBLISH_TOKEN, ($("pubToken").value || "").trim());
+      localStorage.setItem(TPB_PUBLISH_PATH, ($("pubFilePath").value || "status.json").trim());
+      localStorage.setItem(TPB_PUBLISH_MSG, ($("pubCommitMsg").value || "").trim());
+    }
+
+    async function publishToN8n(){
+      const url = ($("pubUrl").value || "").trim();
+      if(!url){
+        toast("Missing webhook URL", "Paste your n8n webhook URL first.");
+        return;
+      }
+
+      savePublishSettings();
+
+      const authType = $("pubAuthType").value || "none";
+      const token = ($("pubToken").value || "").trim();
+      const payload = {
+        filePath: ($("pubFilePath").value || "status.json").trim(),
+        commitMessage: ($("pubCommitMsg").value || "Update status.json (dashboard)").trim(),
+        status: STATE
+      };
+
+      const headers = { "Content-Type": "application/json" };
+      if(authType === "bearer" && token) headers["Authorization"] = "Bearer " + token;
+      if(authType === "xapikey" && token) headers["X-API-Key"] = token;
+
+      toast("Sending…", "Posting dashboard JSON to n8n…");
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+        cache: "no-store"
+      });
+
+      const text = await res.text().catch(()=> "");
+      if(!res.ok){
+        console.error("[Dashboard] publish failed", res.status, text);
+        toast("Save failed", "Webhook returned " + res.status + ". Check console.");
+        return;
+      }
+
+      toast("Saved", "n8n accepted the update. GitHub Pages may take a moment to serve the new status.json.");
+      closeOverlay("ovPublish");
+
+      // Optional: attempt a silent refresh shortly after save (best-effort)
+      setTimeout(async () => {
+        try{ await loadRemote(true); }catch(e){ /* ignore */ }
+      }, 2500);
+    }
+
+    function init(){
+      $("btnAbout").addEventListener("click", () => {
+        const box = $("howItWorks");
+        box.style.display = box.style.display === "none" ? "block" : "none";
+      });
+
+      $("btnEditOverall").addEventListener("click", () => { fillOverallForm(); openOverlay("ovOverall"); });
+      $("btnEditBranch").addEventListener("click", () => { fillBranchForm($("bKey").value || "n8n"); openOverlay("ovBranch"); });
+      $("btnImport").addEventListener("click", () => { $("importJson").value = ""; openOverlay("ovImport"); });
+      $("btnExport").addEventListener("click", exportJson);
+
+      $("btnSaveGithub").addEventListener("click", () => { loadPublishSettings(); openOverlay("ovPublish"); });
+      $("pubSave").addEventListener("click", () => { savePublishSettings(); toast("Saved", "Publish settings saved locally."); });
+      $("pubSend").addEventListener("click", async () => { try{ await publishToN8n(); } catch(e){ console.error(e); toast("Save failed", "Check console for details."); } });
+
+      // Export fallback controls (helps in embedded contexts that block downloads)
+      $("copyExport").addEventListener("click", async () => {
+        const text = ($("exportJsonText").value || "");
+        if(!text.trim()){
+          toast("Nothing to copy", "Export JSON is empty.");
+          return;
+        }
+        try{
+          await navigator.clipboard.writeText(text);
+          toast("Copied", "status.json copied to clipboard.");
+        }catch(e){
+          const ta = $("exportJsonText");
+          ta.focus();
+          ta.select();
+          toast("Copy blocked", "Press Ctrl+C to copy the selected JSON.");
+        }
+      });
+
+      $("openExportTab").addEventListener("click", () => {
+        const text = ($("exportJsonText").value || "");
+        const dataUrl = "data:application/json;charset=utf-8," + encodeURIComponent(text);
+        window.open(dataUrl, "_blank", "noopener,noreferrer");
+      });
+
+      $("btnLoadRemote").addEventListener("click", async () => {
+        try { await loadRemote(false); }
+        catch(e){
+          setMode("local");
+          toast("Load remote failed", "Could not load status.json yet. Try again in a moment.");
+          console.error(e);
+        }
+      });
+
+      $("btnResetLocal").addEventListener("click", () => {
+        if(!confirm("Reset local edits on this device?")) return;
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(MODE_KEY);
+        STATE = normalizeData(DEFAULT_DATA);
+        setMode("local");
+        render();
+        toast("Reset", "Local dashboard data reset.");
+      });
+
+      $("saveOverall").addEventListener("click", () => {
+        STATE.overall.badge = ($("oBadge").value || "").trim();
+        STATE.updatedAt = ($("oUpdatedAt").value || "").trim() || new Date().toISOString();
+        STATE.overall.headline = ($("oHeadline").value || "").trim();
+        STATE.overall.notes = ($("oNotes").value || "").trim();
+        STATE.overall.summary = ($("oSummary").value || "").trim();
+        setLocal(STATE);
+        setMode("local");
+        render();
+        closeOverlay("ovOverall");
+        toast("Saved", "Overall updated (local).");
+      });
+
+      $("bKey").addEventListener("change", () => fillBranchForm($("bKey").value));
+
+      $("saveBranch").addEventListener("click", () => {
+        const key = $("bKey").value;
+        STATE.branches[key].status = $("bStatus").value;
+        STATE.branches[key].progress = clamp(parseInt($("bProgress").value || "0", 10), 0, 100);
+        STATE.branches[key].checkpoints = ($("bCkpts").value || "").split("\\n").map(s => s.trim()).filter(Boolean);
+        STATE.updatedAt = new Date().toISOString();
+        setLocal(STATE);
+        setMode("local");
+        render();
+        closeOverlay("ovBranch");
+        toast("Saved", "Branch updated (local).");
+      });
+
+      $("applyImport").addEventListener("click", () => {
+        const p = safeJSON($("importJson").value || "");
+        if(!p.ok){ toast("Import failed", "Invalid JSON."); return; }
+        STATE = normalizeData(p.val);
+        setLocal(STATE);
+        setMode("local");
+        render();
+        closeOverlay("ovImport");
+        toast("Imported", "Applied JSON to local storage.");
+      });
+
+      wireModalClose();
+
+      const local = getLocal();
+      if(local) STATE = local;
+      render();
+      fillBranchForm("n8n");
+
+      // If the user previously switched to Remote mode, refresh remote on page load (best-effort).
+      if(getMode() === "remote"){
+        loadRemote(true).catch(()=>{ /* ignore */ });
+      }
+    }
+
+    function unlock(){
+      // remove gate from DOM so it can never block clicks afterwards
+      document.getElementById("gate").remove();
+      localStorage.setItem(PASS_KEY, "1");
+      init();
+    }
+
+    function checkGate(){
+      if(localStorage.getItem(PASS_KEY) === "1"){
+        unlock();
+        return;
+      }
+      $("gateBtn").addEventListener("click", () => {
+        const v = ($("gateCode").value || "").trim();
+        if(v === PASSCODE){
+          $("gateErr").classList.remove("show");
+          unlock();
+        }else{
+          $("gateErr").classList.add("show");
+        }
+      });
+      $("gateCode").addEventListener("keydown", (e) => { if(e.key === "Enter") $("gateBtn").click(); });
+    }
+
+    (function boot(){
+      if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", checkGate, { once:true });
+      }else{
+        checkGate();
+      }
+    })();
+  </script>
+</body>
+</html>
