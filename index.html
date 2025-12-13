@@ -556,6 +556,41 @@
     </div>
   </div>
 
+
+  <!-- Mode Choice (first load) -->
+  <div class="overlay" id="ovModeChoice" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="mh">
+        <div>
+          <h3>Choose how you want to work</h3>
+          <p>This dashboard can load the shared project status from GitHub, or let you work locally on this device.</p>
+        </div>
+        <button class="x" type="button" data-close="ovModeChoice" aria-label="Close">x</button>
+      </div>
+      <div class="mb">
+        <div class="kpi" style="margin:0;border-radius:18px">
+          <p class="label" style="margin:0 0 8px">Options</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" type="button" id="modeLoadRemote">Load Shared (GitHub)</button>
+            <button class="btn" type="button" id="modeWorkLocal">Work Locally</button>
+          </div>
+          <p class="sub" id="modeHint" style="margin-top:10px">
+            Tip: you can switch anytime using <b>Load Remote</b> or <b>Reset Local</b>.
+          </p>
+          <label style="display:flex;gap:10px;align-items:center;margin-top:10px;color:var(--muted);font-size:.9rem">
+            <input type="checkbox" id="modeRemember" style="width:18px;height:18px" checked />
+            Remember my choice on this device
+          </label>
+          <p class="sub" id="modeLocalNote" style="margin-top:10px;display:none"></p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-close="ovModeChoice">Close</button>
+      </div>
+    </div>
+  </div>
+
+
   <div class="toast" id="toast" role="status" aria-live="polite">
     <div class="t" id="toastTitle">-</div>
     <div class="m" id="toastMsg">-</div>
@@ -821,6 +856,34 @@
       render();
       if(!silent) toast("Loaded remote", "Pulled status.json and refreshed the dashboard.");
     }
+    async function checkInitialMode(){
+      // If a mode has already been chosen on this device, respect it.
+      const saved = localStorage.getItem(MODE_KEY);
+      if(saved === "remote"){
+        try{ await loadRemote(); }catch(_){ setMode("local"); }
+        return;
+      }
+      if(saved === "local") return;
+
+      // No prior choice: if remote exists, ask the user.
+      const hasLocal = !!localStorage.getItem(STORAGE_KEY);
+      try{
+        const res = await fetch("./status.json?cb=" + Date.now(), { cache: "no-store" });
+        if(!res.ok) throw new Error("remote missing");
+        // Remote exists → show chooser
+        const note = $("modeLocalNote");
+        if(hasLocal && note){
+          note.style.display = "block";
+          note.textContent = "Note: you already have local draft data saved on this device. Choosing “Load Shared” will replace your local copy with the shared file.";
+        }
+        openOverlay("ovModeChoice");
+      }catch(_){
+        // No remote available → default to local without nagging.
+        setMode("local");
+      }
+    }
+
+
 
     function exportJson(){
       const jsonText = JSON.stringify(STATE, null, 2);
@@ -929,6 +992,36 @@
       $("btnExport").addEventListener("click", exportJson);
 
       $("btnSaveGithub").addEventListener("click", () => { loadPublishSettings(); openOverlay("ovPublish"); });
+
+      // First-load mode choice
+      const modeLoadBtn = $("modeLoadRemote");
+      const modeLocalBtn = $("modeWorkLocal");
+      const modeRemember = $("modeRemember");
+
+      if(modeLoadBtn){
+        modeLoadBtn.addEventListener("click", async () => {
+          try{
+            await loadRemote();
+            if(modeRemember && modeRemember.checked) localStorage.setItem(MODE_KEY, "remote");
+            closeOverlay("ovModeChoice");
+          }catch(e){
+            console.error(e);
+            toast("Load remote failed", "Could not load ./status.json. Check console.");
+            setMode("local");
+            closeOverlay("ovModeChoice");
+          }
+        });
+      }
+      if(modeLocalBtn){
+        modeLocalBtn.addEventListener("click", () => {
+          setMode("local");
+          if(modeRemember && modeRemember.checked) localStorage.setItem(MODE_KEY, "local");
+          closeOverlay("ovModeChoice");
+          toast("Local mode", "Working with local draft data on this device.");
+        });
+      }
+
+
       $("pubSave").addEventListener("click", () => { savePublishSettings(); toast("Saved", "Publish settings saved locally."); });
       $("pubSend").addEventListener("click", async () => { try{ await publishToN8n(); } catch(e){ console.error(e); toast("Save failed", "Check console for details."); } });
 
@@ -1018,10 +1111,12 @@
 
       const local = getLocal();
       if(local) STATE = local;
-      render();
-      fillBranchForm("n8n");
 
-      // If the user previously switched to Remote mode, refresh remote on page load (best-effort).
+      checkInitialMode().finally(() => {
+        render();
+        fillBranchForm("n8n");
+      });
+// If the user previously switched to Remote mode, refresh remote on page load (best-effort).
       if(getMode() === "remote"){
         loadRemote(true).catch(()=>{ /* ignore */ });
       }
