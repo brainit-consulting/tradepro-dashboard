@@ -333,7 +333,7 @@
       <div style="min-width: 0;">
         <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
         <p class="h-sub">Live view + editable data (saved to your browser, exportable as <code>status.json</code>).
-        <span class="build-version">• Build: V007</span>
+        <span class="build-version">• Build: V008</span>
         </p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
@@ -531,18 +531,27 @@
     <div class="modal">
       <div class="mh">
         <div>
-          <h3>Save to GitHub (via n8n)</h3>
-          <p>This posts your current dashboard JSON to an n8n webhook that commits <code>status.json</code>.</p>
+          <h3>Save to GitHub</h3>
+          <p>Choose how you want to publish <code>status.json</code>: via your n8n webhook, or directly to GitHub using a Personal Access Token (PAT).</p>
         </div>
         <button class="x" type="button" data-close="ovPublish">x</button>
       </div>
       <div class="mb">
         <div class="form two">
           <div style="grid-column:1/-1">
+            <label for="pubMethod">Publish method</label>
+            <select id="pubMethod">
+              <option value="n8n">n8n Webhook</option>
+              <option value="github">Direct GitHub API (PAT)</option>
+            </select>
+          </div>
+
+          <!-- n8n -->
+          <div style="grid-column:1/-1" data-pub="n8n">
             <label for="pubUrl">n8n Webhook URL</label>
             <input id="pubUrl" placeholder="https://n8n.yourdomain.com/webhook/xxxxx" />
           </div>
-          <div>
+          <div data-pub="n8n">
             <label for="pubAuthType">Auth type (optional)</label>
             <select id="pubAuthType">
               <option value="none">None</option>
@@ -550,9 +559,32 @@
               <option value="xapikey">X-API-Key header</option>
             </select>
           </div>
-          <div>
+          <div data-pub="n8n">
             <label for="pubToken">Token / Key (optional)</label>
             <input id="pubToken" placeholder="leave blank if none" />
+          </div>
+          <div style="grid-column:1/-1" data-pub="n8n">
+            <div class="foot" style="margin-top:0">
+              Note: when the dashboard is hosted on a different domain than n8n, the n8n webhook must allow this site (CORS) so the browser is allowed to call it.
+            </div>
+          </div>
+
+          <!-- GitHub direct -->
+          <div data-pub="github">
+            <label for="ghOwner">GitHub owner</label>
+            <input id="ghOwner" placeholder="brainit-consulting" />
+          </div>
+          <div data-pub="github">
+            <label for="ghRepo">GitHub repo</label>
+            <input id="ghRepo" placeholder="tradepro-dashboard" />
+          </div>
+          <div data-pub="github">
+            <label for="ghBranch">Branch</label>
+            <input id="ghBranch" placeholder="main" />
+          </div>
+          <div data-pub="github">
+            <label for="ghPat">GitHub PAT</label>
+            <input id="ghPat" type="password" placeholder="github_pat_..." autocomplete="current-password" />
           </div>
           <div style="grid-column:1/-1">
             <label for="pubFilePath">Target file path in repo</label>
@@ -562,9 +594,12 @@
             <label for="pubCommitMsg">Commit message</label>
             <input id="pubCommitMsg" value="Update status.json (dashboard)" />
           </div>
-        </div>
-        <div class="foot" style="margin-top:10px">
-          Note: the webhook must send CORS headers (<code>Access-Control-Allow-Origin</code>) so this page can call it from your website.
+
+          <div style="grid-column:1/-1" data-pub="github">
+            <div class="foot" style="margin-top:0">
+              Security note: storing a PAT in a browser is convenient but not ideal. Use a low-scope token (contents write only) and rotate it if needed.
+            </div>
+          </div>
         </div>
       </div>
       <div class="actions">
@@ -575,8 +610,7 @@
     </div>
   </div>
 
-
-  <!-- Mode Choice (first load) -->
+<!-- Mode Choice (first load) -->
   <div class="overlay" id="ovModeChoice" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="mh">
@@ -625,6 +659,11 @@
     const TPB_PUBLISH_TOKEN = "tpb_publish_token_v1";
     const TPB_PUBLISH_PATH = "tpb_publish_path_v1";
     const TPB_PUBLISH_MSG = "tpb_publish_msg_v1";
+    const TPB_PUBLISH_METHOD = "tpb_publish_method_v1";
+    const TPB_GH_OWNER = "tpb_gh_owner_v1";
+    const TPB_GH_REPO = "tpb_gh_repo_v1";
+    const TPB_GH_BRANCH = "tpb_gh_branch_v1";
+    const TPB_GH_PAT = "tpb_gh_pat_v1";
 
     // IMPORTANT: change this to your own passcode
     const PASSCODE = "tradepro";
@@ -942,38 +981,156 @@
       }
     }
 
+    
     function loadPublishSettings(){
+      const method = localStorage.getItem(TPB_PUBLISH_METHOD) || "n8n";
+      const methodEl = $("pubMethod");
+      if(methodEl) methodEl.value = method;
+
       $("pubUrl").value = localStorage.getItem(TPB_PUBLISH_URL) || "";
       $("pubAuthType").value = localStorage.getItem(TPB_PUBLISH_AUTH) || "none";
       $("pubToken").value = localStorage.getItem(TPB_PUBLISH_TOKEN) || "";
+
+      $("ghOwner").value = localStorage.getItem(TPB_GH_OWNER) || "brainit-consulting";
+      $("ghRepo").value = localStorage.getItem(TPB_GH_REPO) || "tradepro-dashboard";
+      $("ghBranch").value = localStorage.getItem(TPB_GH_BRANCH) || "main";
+      $("ghPat").value = localStorage.getItem(TPB_GH_PAT) || "";
+
       $("pubFilePath").value = localStorage.getItem(TPB_PUBLISH_PATH) || "status.json";
       $("pubCommitMsg").value = localStorage.getItem(TPB_PUBLISH_MSG) || "Update status.json (dashboard)";
+
+      updatePublishUi();
     }
 
+
+    
     function savePublishSettings(){
+      localStorage.setItem(TPB_PUBLISH_METHOD, ($("pubMethod").value || "n8n").trim());
+
       localStorage.setItem(TPB_PUBLISH_URL, ($("pubUrl").value || "").trim());
       localStorage.setItem(TPB_PUBLISH_AUTH, $("pubAuthType").value || "none");
       localStorage.setItem(TPB_PUBLISH_TOKEN, ($("pubToken").value || "").trim());
+
+      localStorage.setItem(TPB_GH_OWNER, ($("ghOwner").value || "").trim());
+      localStorage.setItem(TPB_GH_REPO, ($("ghRepo").value || "").trim());
+      localStorage.setItem(TPB_GH_BRANCH, ($("ghBranch").value || "main").trim());
+      localStorage.setItem(TPB_GH_PAT, ($("ghPat").value || "").trim());
+
       localStorage.setItem(TPB_PUBLISH_PATH, ($("pubFilePath").value || "status.json").trim());
       localStorage.setItem(TPB_PUBLISH_MSG, ($("pubCommitMsg").value || "Update status.json (dashboard)").trim());
     }
+    function updatePublishUi(){
+      const method = ($("pubMethod") && $("pubMethod").value) ? $("pubMethod").value : "n8n";
+      document.querySelectorAll("[data-pub]").forEach(el => {
+        const show = el.getAttribute("data-pub") === method;
+        el.style.display = show ? "" : "none";
+      });
+    }
 
+
+
+    async 
     async function publishToN8n(){
+      // NOTE: name kept for backward compatibility, but this can publish via n8n or directly to GitHub
+      const method = ($("pubMethod").value || "n8n").trim();
+      savePublishSettings();
+
+      const payload = {
+        filePath: ($("pubFilePath").value || "status.json").trim(),
+        commitMessage: ($("pubCommitMsg").value || "Update status.json (dashboard)").trim(),
+        status: STATE
+      };
+
+      // Pretty JSON that matches what we want committed
+      const pretty = JSON.stringify(payload.status, null, 2) + "\n";
+
+      if(method === "github"){
+        const owner = ($("ghOwner").value || "").trim();
+        const repo = ($("ghRepo").value || "").trim();
+        const branch = ($("ghBranch").value || "main").trim();
+        const pat = ($("ghPat").value || "").trim();
+
+        if(!owner || !repo){
+          toast("Missing GitHub repo", "Enter GitHub owner + repo.");
+          return;
+        }
+        if(!pat){
+          toast("Missing PAT", "Paste your GitHub Personal Access Token.");
+          return;
+        }
+
+        toast("Sending…", "Publishing directly to GitHub…");
+
+        const apiBase = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(payload.filePath)}`;
+
+        // 1) GET current file (to obtain sha). If missing, we'll create it.
+        let sha = null;
+        try{
+          const getRes = await fetch(apiBase + `?ref=${encodeURIComponent(branch)}`, {
+            method: "GET",
+            headers: {
+              "Accept": "application/vnd.github+json",
+              "Authorization": "Bearer " + pat,
+              "X-GitHub-Api-Version": "2022-11-28"
+            },
+            cache: "no-store"
+          });
+          if(getRes.ok){
+            const j = await getRes.json();
+            if(j && j.sha) sha = j.sha;
+          }
+        }catch(e){
+          // ignore: we'll attempt PUT without sha only if file doesn't exist
+        }
+
+        // 2) PUT new content
+        const contentBase64 = btoa(unescape(encodeURIComponent(pretty)));
+        const body = {
+          message: payload.commitMessage,
+          content: contentBase64,
+          branch
+        };
+        if(sha) body.sha = sha;
+
+        const putRes = await fetch(apiBase, {
+          method: "PUT",
+          headers: {
+            "Accept": "application/vnd.github+json",
+            "Authorization": "Bearer " + pat,
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body),
+          cache: "no-store"
+        });
+
+        const putText = await putRes.text().catch(()=> "");
+        if(!putRes.ok){
+          console.error("[Dashboard] GitHub publish failed", putRes.status, putText);
+          toast("Save failed", "GitHub returned " + putRes.status + ". Check console.");
+          return;
+        }
+
+        toast("Saved", "GitHub accepted the update. Your site may take a moment to show the new status.json.");
+        closeOverlay("ovPublish");
+
+        // Best-effort refresh
+        setTimeout(async () => {
+          try{ await loadRemote(true); }catch(e){ /* ignore */ }
+        }, 2500);
+
+        return;
+      }
+
+      // method === "n8n"
       const url = ($("pubUrl").value || "").trim();
       if(!url){
         toast("Missing webhook URL", "Paste your n8n webhook URL first.");
         return;
       }
 
-      savePublishSettings();
-
       const authType = $("pubAuthType").value || "none";
       const token = ($("pubToken").value || "").trim();
-      const payload = {
-        filePath: ($("pubFilePath").value || "status.json").trim(),
-        commitMessage: ($("pubCommitMsg").value || "Update status.json (dashboard)").trim(),
-        status: STATE
-      };
 
       const headers = { "Content-Type": "application/json" };
       if(authType === "bearer" && token) headers["Authorization"] = "Bearer " + token;
@@ -995,14 +1152,14 @@
         return;
       }
 
-      toast("Saved", "n8n accepted the update. GitHub Pages may take a moment to serve the new status.json.");
+      toast("Saved", "n8n accepted the update. Your site may take a moment to serve the new status.json.");
       closeOverlay("ovPublish");
 
-      // Optional: attempt a silent refresh shortly after save (best-effort)
       setTimeout(async () => {
         try{ await loadRemote(true); }catch(e){ /* ignore */ }
       }, 2500);
     }
+
 
     function init(){
       $("btnAbout").addEventListener("click", () => {
@@ -1016,6 +1173,9 @@
       $("btnExport").addEventListener("click", exportJson);
 
       $("btnSaveGithub").addEventListener("click", () => { loadPublishSettings(); openOverlay("ovPublish"); });
+
+      $("pubMethod").addEventListener("change", updatePublishUi);
+
 
       // First-load mode choice
       const modeLoadBtn = $("modeLoadRemote");
