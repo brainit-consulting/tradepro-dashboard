@@ -390,6 +390,10 @@
         <div class="hd">
           <h2 id="branchesTitle">Progress by Branch</h2>
           <span class="pill" id="localModePill">Mode: <b>Local</b></span>
+          <span class="pill" id="remoteFetchedPill" style="display:none">
+          Remote fetched: <b id="remoteFetchedAt">-</b>
+          </span>
+
         </div>
         <div class="bd" id="branches"></div>
       </section>
@@ -653,6 +657,7 @@
     const STORAGE_KEY = "tpb_status_v1";
     const MODE_KEY = "tpb_mode_v1";
     const PASS_KEY = "tpb_gate_ok_v1";
+    const REMOTE_FETCH_KEY = "tpb_remote_fetched_at_v1";
 
     const TPB_PUBLISH_URL = "tpb_publish_url_v1";
     const TPB_PUBLISH_AUTH = "tpb_publish_auth_v1";
@@ -867,6 +872,8 @@
       }
 
       setMode(getMode());
+      
+
     }
 
     function openOverlay(id){ $(id).classList.add("show"); }
@@ -912,6 +919,9 @@
 
       const raw = await res.json();
       STATE = normalizeData(raw);
+      const fetchedAt = new Date().toISOString();
+      localStorage.setItem(REMOTE_FETCH_KEY, fetchedAt);
+
 
       setLocal(STATE);
       setMode("remote");
