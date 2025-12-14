@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-13T19:54:52.931Z",
+  "updatedAt": "2025-12-14T03:33:08.564Z",
   "overall": {
     "badge": "In Progress",
     "headline": "Dashboard is now wired for auto updates.",
@@ -11,14 +11,14 @@
       "status": "In Progress",
       "progress": 27,
       "checkpoints": [
-        "SAVE JSON TO GitHUB with local and remote option. done\nPlumbers in beta\nRoofers in beta\nElectrical in beta"
+        "SAVE JSON TO GitHUB with local and remote option. Edge case testing in progress...here\nPlumbers in beta\nRoofers in beta\nElectrical in beta"
       ]
     },
     "forms": {
       "status": "In Development",
       "progress": 50,
       "checkpoints": [
-        "Roofers - Roofer App & Estimate Workflow\nPlumbers - Service Request → Job Ticket → Estimate\nElectricians - Safety Checks, Reports & Quote Automation"
+        "Roofers - Roofer App & Estimate Workflow\nPlumbers - Service Request → Job Ticket → Estimate\nElectricians - Safety Checks, Reports & Quote Automation\nIn Memory Form for the Dashboard -> n8n -> status.json on GitHub -> Website"
       ]
     },
     "reports": {
