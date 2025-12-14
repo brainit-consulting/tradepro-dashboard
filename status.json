@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-14T16:15:00.287Z",
+  "updatedAt": "2025-12-14T16:28:28.028Z",
   "overall": {
     "badge": "In Progress",
     "headline": "Dashboard is now wired for auto updates.",
@@ -11,8 +11,7 @@
       "status": "In Development",
       "progress": 79,
       "checkpoints": [
-        "not quite working yet..not so boringly reliable yet",
-        "at least it is saved on github but have to refresh browser to show them"
+        "test version 9"
       ]
     },
     "forms": {
