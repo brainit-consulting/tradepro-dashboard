@@ -1,25 +1,21 @@
 {
-  "updatedAt": "2025-12-14T03:33:08.564Z",
+  "updatedAt": "2025-12-14T16:06:02.433Z",
   "overall": {
     "badge": "In Progress",
     "headline": "Dashboard is now wired for auto updates.",
-    "notes": "DEBUGGING THE SAVE TO JSON TO GITHUB",
-    "summary": "JSON TO GITBUB TEST..."
+    "notes": "Next: test if remote status.json updates correctly...",
+    "summary": ""
   },
   "branches": {
     "n8n": {
       "status": "In Progress",
-      "progress": 27,
-      "checkpoints": [
-        "SAVE JSON TO GitHUB with local and remote option. Edge case testing in progress...here\nPlumbers in beta\nRoofers in beta\nElectrical in beta"
-      ]
+      "progress": 82,
+      "checkpoints": []
     },
     "forms": {
-      "status": "In Development",
-      "progress": 50,
-      "checkpoints": [
-        "Roofers - Roofer App & Estimate Workflow\nPlumbers - Service Request → Job Ticket → Estimate\nElectricians - Safety Checks, Reports & Quote Automation\nIn Memory Form for the Dashboard -> n8n -> status.json on GitHub -> Website"
-      ]
+      "status": "In Progress",
+      "progress": 75,
+      "checkpoints": []
     },
     "reports": {
       "status": "Active",
