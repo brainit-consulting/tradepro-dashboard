@@ -1,7 +1,14 @@
 # TradeProBuddy Dashboard — User Guide
 
 ## Overview
-A single-file dashboard (`index.html`) for tracking project status. Data is stored locally in the browser (`localStorage`) but can be pulled from or pushed to a shared `status.json` (for example, hosted on GitHub Pages). Optionally, changes can be committed via an `n8n` webhook.
+A single-file dashboard (`index.html`) for tracking project status. Data is stored locally in the browser (it saves automatically in your browser), but the dashboard can also read from or push changes to a shared `status.json` (for example, hosted on GitHub Pages). Optionally, changes can be committed via an `n8n` webhook.
+
+## Quick Start
+- **Open the dashboard:** Double-click `index.html` or open it in your browser.
+- **Unlock:** Enter the passcode (default: `tradepro`) when prompted.
+- **View status:** Check the project overview and branch progress on the main page.
+- **Make edits (if enabled):** Use the UI to update items; changes save automatically in your browser.
+- **Use shared updates (optional):** Ask a teammate to configure the shared `status.json` or an `n8n` integration to sync updates across devices.
 
 ## What’s in the repo
 - `index.html` — the dashboard, including UI, logic, passcode gate, and modals.
