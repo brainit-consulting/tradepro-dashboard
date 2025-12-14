@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-14T16:06:02.433Z",
+  "updatedAt": "2025-12-14T16:09:30.785Z",
   "overall": {
     "badge": "In Progress",
     "headline": "Dashboard is now wired for auto updates.",
@@ -8,9 +8,11 @@
   },
   "branches": {
     "n8n": {
-      "status": "In Progress",
-      "progress": 82,
-      "checkpoints": []
+      "status": "In Development",
+      "progress": 79,
+      "checkpoints": [
+        "not quite working yet..not so boringly reliable yet"
+      ]
     },
     "forms": {
       "status": "In Progress",
