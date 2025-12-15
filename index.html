@@ -1207,78 +1207,71 @@ function loadLocal() {
   // Server sync
   // ============================================================
   async function saveToServer() {
-    const cfg = getServerSettings();
-    if (!cfg.saveUrl) {
-      toast("Set Save URL first");
-      openServerSettings();
-      return;
+  const cfg = getServerSettings();
+  if (!cfg.saveUrl) { toast("Set Save URL first"); openServerSettings(); return; }
+  if (!cfg.apiKey)  { toast("Set API key first");  openServerSettings(); return; }
+
+  // Keep a snapshot so we can safely merge / roll back
+  const localSnapshot = JSON.parse(JSON.stringify(STATE));
+
+  STATE.updatedAt = new Date().toISOString();
+
+  const payload = {
+    updated_by: cfg.updatedBy || "dashboard",
+    status: STATE
+  };
+
+  try {
+    const res = await fetch(cfg.saveUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": cfg.apiKey
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} ${res.statusText}${txt ? " – " + txt : ""}`);
     }
-    if (!cfg.apiKey) {
-      toast("Set API key first");
-      openServerSettings();
-      return;
-    }
 
-    STATE.updatedAt = new Date().toISOString();
+    const data = await res.json().catch(() => ({}));
 
-    const payload = {
-      updated_by: cfg.updatedBy || "dashboard",
-      status: STATE
-    };
+    // If server returns a full status, merge it safely without erasing local fields
+    if (data && data.status && typeof data.status === "object") {
+      const server = data.status || {};
 
-    try {
-      const res = await fetch(cfg.saveUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": cfg.apiKey
-        },
-        body: JSON.stringify(payload)
-      });
+      const merged = {
+        ...localSnapshot,
+        ...server,
+        overall: { ...(localSnapshot.overall || {}), ...(server.overall || {}) },
+        branches: { ...(localSnapshot.branches || {}), ...(server.branches || {}) },
+        updatedAt: server.updatedAt || localSnapshot.updatedAt || new Date().toISOString()
+      };
 
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status} ${res.statusText}${txt ? " – " + txt : ""}`);
-      }
-
-      const data = await res.json().catch(() => ({}));
-      if (data && data.status) {
-        STATE = normalizeState(data.status);
-        saveLocal(STATE);
-        renderAll();
-        toast("Saved to server");
-      } else {
-        saveLocal(STATE);
-        renderAll();
-        toast("Saved (no status returned)");
-      }
-    } catch (e) {
-      toast("Save failed: " + e.message);
-    }
-  }
-
-  async function refreshFromServer() {
-    const cfg = getServerSettings();
-    if (!cfg.readUrl) {
-      toast("No Read URL configured");
-      openServerSettings();
-      return;
-    }
-    try {
-      const res = await fetch(cfg.readUrl, {
-        method: "GET",
-        headers: cfg.apiKey ? { "x-api-key": cfg.apiKey } : {}
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-      const data = await res.json();
-      STATE = normalizeState(data);
+      STATE = normalizeState(merged);
       saveLocal(STATE);
       renderAll();
-      toast("Refreshed from server");
-    } catch (e) {
-      toast("Refresh failed: " + e.message);
+      toast("Saved to server");
+      return;
     }
+
+    // If server doesn’t return status, keep local exactly as-is
+    STATE = localSnapshot;
+    saveLocal(STATE);
+    renderAll();
+    toast("Saved (no status returned)");
+
+  } catch (e) {
+    // On failure, restore local snapshot (prevents any perceived “wipe”)
+    STATE = localSnapshot;
+    saveLocal(STATE);
+    renderAll();
+    toast("Save failed: " + e.message);
   }
+}
+
 
   function openServerSettings() {
     const cfg = getServerSettings();
