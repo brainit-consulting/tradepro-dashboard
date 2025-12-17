@@ -415,7 +415,7 @@
     <header>
       <div style="min-width: 0;">
         <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
-        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V026</span></p>
+        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V027</span></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
@@ -622,7 +622,7 @@
           <div class="modalTitle">Create New Branch</div>
           <div class="modalSub">Adds a new branch card and saves locally. Use "Save To Server" to persist to n8n.</div>
         </div>
-        <button class="iconBtn" type="button" id="nbClose" aria-label="Close" onclick="TPB_UI.closeNewBranch(event)">✕</button>
+        <button class="iconBtn" type="button" id="nbClose" aria-label="Close">✕</button>
       </div>
 
       <div class="modalBody">
@@ -658,8 +658,8 @@
       </div>
 
       <div class="modalFooter">
-        <button class="btn ghost" type="button" id="nbCancel" onclick="TPB_UI.closeNewBranch(event)">Cancel</button>
-        <button class="btn primary" type="button" id="nbCreate" onclick="TPB_UI.createBranchFromForm(event)">Create Branch</button>
+        <button class="btn ghost" type="button" id="nbCancel">Cancel</button>
+        <button class="btn primary" type="button" id="nbCreate">Create Branch</button>
       </div>
     </div>
   </div>
@@ -1033,6 +1033,7 @@ function toast(msg, kind, opts) {
     const headline = $("overallHeadline");
     const notes = $("overallNotes");
     const summary = $("overallSummary");
+    const summaryPill = $("overallSummaryPill");
     const updated = $("updatedAt");
 
     if (badge) badge.textContent = o.badge || "-";
@@ -1040,6 +1041,16 @@ function toast(msg, kind, opts) {
     if (headline) headline.textContent = o.headline || "-";
     if (notes) notes.textContent = o.notes || "-";
     if (summary) summary.textContent = o.summary || "";
+    if (summaryPill) {
+      const text = (o.summary || "").trim();
+      if (text) {
+        summaryPill.textContent = text;
+        summaryPill.style.display = "inline-flex";
+      } else {
+        summaryPill.textContent = "";
+        summaryPill.style.display = "none";
+      }
+    }
     if (updated) {
       try {
         const d = new Date(STATE.updatedAt);
@@ -1221,7 +1232,6 @@ function toast(msg, kind, opts) {
 
     SAVE_IN_FLIGHT = true;
 
-
     const localSnapshot = JSON.parse(JSON.stringify(STATE));
     STATE.updatedAt = new Date().toISOString();
 
@@ -1277,6 +1287,8 @@ function toast(msg, kind, opts) {
       renderAll();
       markServerError();
       toast("Save failed: " + e.message, "danger");
+    } finally {
+      SAVE_IN_FLIGHT = false;
     }
   }
 
@@ -1445,7 +1457,11 @@ function toast(msg, kind, opts) {
     updateSavePill();
   }
 
-  init();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
 </script>
 
