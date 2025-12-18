@@ -372,6 +372,39 @@
       display:block;
     }
     .cp-text.checked{color:rgba(148,163,184,.65);text-decoration:line-through;}
+    .cp-editor-list{display:flex;flex-direction:column;gap:8px;}
+    .cp-row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:6px 8px;
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:12px;
+      background:rgba(0,0,0,.18);
+    }
+    .cp-row input[type="text"]{
+      flex:1;
+      margin:0;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(0,0,0,.25);
+      color:var(--ink);
+    }
+    .cp-row .cp-del{
+      appearance:none;
+      border:1px solid rgba(148,163,184,.18);
+      background:rgba(239,68,68,.12);
+      color:var(--ink);
+      width:32px;height:32px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:800;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .cp-row .cp-del:hover{background:rgba(239,68,68,.2)}
     .foot{
       margin-top:14px;
       color:var(--muted);
@@ -749,7 +782,7 @@
         <button class="x" type="button" data-close="ovOverall">x</button>
       </div>
       <div class="mb">
-        <div class="form two">
+      <div class="form two">
           <div>
             <label for="oBadge">Badge</label>
             <input id="oBadge" />
@@ -838,7 +871,11 @@
           </div>
           <div style="grid-column:1/-1">
             <label for="bCkpts">Checkpoints (one per line)</label>
-            <textarea id="bCkpts"></textarea>
+            <div id="bCkptsList" class="cp-editor-list"></div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+              <input id="bCkptNew" placeholder="Add checkpoint" />
+              <button class="btn small" type="button" id="bCkptAdd">Add</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1978,6 +2015,55 @@ function toast(msg, kind, opts) {
     if (selected && keys.includes(selected)) sel.value = selected;
   }
 
+  function renderBranchEditorCheckpoints(list) {
+    const container = $("bCkptsList");
+    if (!container) return;
+    const cps = Array.isArray(list) ? list : [];
+    container.innerHTML = cps.map((cp, idx) => {
+      const item = normalizeCheckpointItem(cp) || { text: "", done: false };
+      const checked = item.done ? "checked" : "";
+      return `
+        <div class="cp-row" data-cp-index="${idx}">
+          <input class="cp-check" type="checkbox" ${checked} />
+          <input type="text" class="cp-text-input" value="${esc(item.text)}" placeholder="Checkpoint" />
+          <button class="cp-del" type="button" title="Remove">×</button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function getBranchEditorCheckpointsFromDOM() {
+    const container = $("bCkptsList");
+    if (!container) return [];
+    const rows = Array.from(container.querySelectorAll(".cp-row"));
+    const result = [];
+    rows.forEach(row => {
+      const textInput = row.querySelector(".cp-text-input");
+      const check = row.querySelector(".cp-check");
+      const text = (textInput?.value || "").trim();
+      if (text) result.push({ text, done: !!check?.checked });
+    });
+    return result;
+  }
+
+  function addBranchEditorCheckpoint(text = "") {
+    const container = $("bCkptsList");
+    if (!container) return;
+    const idx = container.querySelectorAll(".cp-row").length;
+    const checked = "";
+    const row = document.createElement("div");
+    row.className = "cp-row";
+    row.setAttribute("data-cp-index", String(idx));
+    row.innerHTML = `
+      <input class="cp-check" type="checkbox" ${checked} />
+      <input type="text" class="cp-text-input" value="${esc(text)}" placeholder="Checkpoint" />
+      <button class="cp-del" type="button" title="Remove">×</button>
+    `;
+    container.appendChild(row);
+    const input = row.querySelector(".cp-text-input");
+    if (input) input.focus();
+  }
+
   function openBranchEditor(key) {
     fillBranchSelect(key);
     const k = $("bKey").value;
@@ -1990,7 +2076,7 @@ function toast(msg, kind, opts) {
     $("bDueDate").value = meta.dueDate || "";
     $("bTags").value = (meta.tags || []).join(", ");
     $("bProgress").value = String(b.progress ?? 0);
-    $("bCkpts").value = (b.checkpoints || []).map(cp => (cp && cp.text) ? cp.text : String(cp || "")).join("\n");
+    renderBranchEditorCheckpoints(b.checkpoints || []);
     openOverlay("ovBranch");
   }
 
@@ -2027,11 +2113,10 @@ function toast(msg, kind, opts) {
       renameBranchMeta(key, nextKey);
     }
 
-    const priorCheckpoints = Array.isArray(STATE.branches[nextKey].checkpoints) ? STATE.branches[nextKey].checkpoints : [];
     STATE.branches[nextKey].status = ($("bStatus").value || "").trim();
     STATE.branches[nextKey].priority = priority;
     STATE.branches[nextKey].progress = clamp(Number($("bProgress").value || 0) || 0, 0, 100);
-    STATE.branches[nextKey].checkpoints = normalizeCheckpoints(($("bCkpts").value || "").trim(), priorCheckpoints);
+    STATE.branches[nextKey].checkpoints = getBranchEditorCheckpointsFromDOM();
     setBranchMeta(nextKey, { owner, tags, dueDate, priority });
     STATE.branchOrder = normalizeBranchOrder(STATE.branches, STATE.branchOrder);
 
@@ -2639,6 +2724,20 @@ function toast(msg, kind, opts) {
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") setBackupsMenu(false);
+    });
+
+    $("bCkptAdd")?.addEventListener("click", () => {
+      const input = $("bCkptNew");
+      const text = (input?.value || "").trim();
+      addBranchEditorCheckpoint(text);
+      if (input) input.value = "";
+    });
+    const ckptList = $("bCkptsList");
+    ckptList?.addEventListener("click", (e) => {
+      const del = e.target.closest(".cp-del");
+      if (!del) return;
+      const row = del.closest(".cp-row");
+      if (row) row.remove();
     });
 
     const branchesEl = $("branches");
