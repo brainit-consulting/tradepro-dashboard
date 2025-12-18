@@ -279,23 +279,6 @@
       gap:8px;
       flex-wrap:wrap;
     }
-    .branch-body{margin-top:8px;}
-    .branch-body.collapsed{display:none;}
-    .collapse-btn{
-      appearance:none;
-      border:1px solid rgba(148,163,184,.22);
-      background:rgba(0,0,0,.2);
-      color:var(--muted);
-      width:28px;height:28px;
-      border-radius:10px;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:800;
-      font-size:14px;
-    }
-    .collapse-btn:hover{background:rgba(0,0,0,.28)}
     .risk-badge{
       padding:4px 8px;
       border-radius:999px;
@@ -672,7 +655,7 @@
     <header>
       <div style="min-width: 0;">
         <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
-        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V048</span></p>
+        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V047</span></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
@@ -1118,8 +1101,6 @@
   let LAST_REMOTE_CHECK_AT = 0;
   let DRAG_KEY = null;
   let PENDING_RESTORE = null;
-  let BRANCH_COLLAPSE = {};
-  const COLLAPSE_KEY = "tpb_branch_collapse_v1";
 
   function markDirty() {
     DIRTY = true;
@@ -1452,10 +1433,6 @@ const PASS_KEY = "tpb_gate_ok_v1";
     if (typeof item === "object" && item.text) {
       return { text: String(item.text).trim(), done: !!item.done };
     }
-    if (typeof item === "object") {
-      const txt = String(item.text || item.title || item.label || JSON.stringify(item) || "").trim();
-      if (txt) return { text: txt, done: !!item.done };
-    }
     return null;
   }
 
@@ -1507,23 +1484,6 @@ const PASS_KEY = "tpb_gate_ok_v1";
       console.error("Failed to load from localStorage:", e);
     }
     return null;
-  }
-
-  function loadCollapseState() {
-    try {
-      const raw = localStorage.getItem(COLLAPSE_KEY);
-      if (!raw) return {};
-      const parsed = JSON.parse(raw);
-      return parsed && typeof parsed === "object" ? parsed : {};
-    } catch {
-      return {};
-    }
-  }
-
-  function saveCollapseState() {
-    try {
-      localStorage.setItem(COLLAPSE_KEY, JSON.stringify(BRANCH_COLLAPSE));
-    } catch {}
   }
 
   function getServerSettings() {
@@ -1908,7 +1868,6 @@ function toast(msg, kind, opts) {
         const cls = item.done ? "cp-text checked" : "cp-text";
         return `<li><input class="cp-check" type="checkbox" data-branch-key="${esc(key)}" data-cp-index="${i}" ${checked}/><span class="${cls}">${esc(item.text)}</span></li>`;
       }).join("");
-      const collapsed = BRANCH_COLLAPSE[key] === true ? true : false;
       return `
         <div class="branch-item" data-branch-key="${esc(key)}">
           <div class="tr">
@@ -1917,16 +1876,13 @@ function toast(msg, kind, opts) {
               <button class="btn small move-btn" type="button" data-move-branch="up" data-branch-key="${esc(key)}" ${isFirst ? "disabled" : ""} aria-label="Move branch up">▲</button>
               <button class="btn small move-btn" type="button" data-move-branch="down" data-branch-key="${esc(key)}" ${isLast ? "disabled" : ""} aria-label="Move branch down">▼</button>
             </div>
-            <button class="collapse-btn" type="button" data-toggle-branch="${esc(key)}" aria-expanded="${!collapsed}">${collapsed ? "▸" : "▾"}</button>
             <div class="area">${esc(key)}</div>
             ${statusHtml}
             <div class="bar"><i style="width:${b.progress || 0}%"></i></div>
             <button class="btn small" data-edit-branch="${esc(key)}">Edit</button>
           </div>
-          <div class="branch-body ${collapsed ? "collapsed" : ""}">
-            <div class="branch-meta">Owner: ${ownerText} | Priority: ${priorityText} | Due: ${dueText} | Tags: ${tagsText}</div>
-            ${ckpts ? `<ul class="ckpts">${ckpts}</ul>` : ""}
-          </div>
+          <div class="branch-meta">Owner: ${ownerText} | Priority: ${priorityText} | Due: ${dueText} | Tags: ${tagsText}</div>
+          ${ckpts ? `<ul class="ckpts">${ckpts}</ul>` : ""}
         </div>
       `;
     }).join("");
@@ -1972,13 +1928,6 @@ function toast(msg, kind, opts) {
     if (!container) return;
     container.querySelectorAll(".branch-item.drag-over").forEach(el => el.classList.remove("drag-over"));
     container.querySelectorAll(".branch-item.dragging").forEach(el => el.classList.remove("dragging"));
-  }
-
-  function toggleBranchCollapse(key) {
-    if (!key) return;
-    BRANCH_COLLAPSE[key] = !(BRANCH_COLLAPSE[key] === true ? true : false);
-    saveCollapseState();
-    renderBranches();
   }
 
   function updateModePill() {
@@ -2829,12 +2778,6 @@ function toast(msg, kind, opts) {
         if (key && dir) moveBranchInView(key, dir);
         return;
       }
-      const toggle = e.target.closest("[data-toggle-branch]");
-      if (toggle) {
-        const key = toggle.getAttribute("data-toggle-branch");
-        toggleBranchCollapse(key);
-        return;
-      }
       const btn = e.target.closest("[data-edit-branch]");
       if (!btn) return;
       const key = btn.getAttribute("data-edit-branch");
@@ -2925,7 +2868,6 @@ function toast(msg, kind, opts) {
     if (saved) {
       STATE = normalizeState(saved);
     }
-    BRANCH_COLLAPSE = loadCollapseState();
     META = loadMeta();
 
     const cfg = getServerSettings();
@@ -2970,7 +2912,6 @@ function toast(msg, kind, opts) {
 
 </body>
 </html>
-
 
 
 
