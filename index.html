@@ -344,67 +344,11 @@
     .branch-item.dragging{opacity:.6}
     .ckpts{
       margin:10px 0 0;
-      padding:0;
+      padding:0 0 0 18px;
       color:var(--muted);
       line-height:1.45;
-      list-style:none;
     }
-    .ckpts li{margin:4px 0;display:flex;align-items:center;gap:10px;}
-    .ckpts .cp-check{
-      width:18px;height:18px;border-radius:6px;
-      border:1px solid rgba(148,163,184,.28);
-      background:rgba(0,0,0,.25);
-      appearance:none;
-      cursor:pointer;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      position:relative;
-    }
-    .cp-check:checked{
-      border-color:rgba(52,211,153,.5);
-      background:rgba(52,211,153,.2);
-    }
-    .cp-check:checked:after{
-      content:"";
-      width:8px;height:8px;border-radius:3px;
-      background:rgba(52,211,153,.9);
-      display:block;
-    }
-    .cp-text.checked{color:rgba(148,163,184,.65);text-decoration:line-through;}
-    .cp-editor-list{display:flex;flex-direction:column;gap:8px;}
-    .cp-row{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:6px 8px;
-      border:1px solid rgba(148,163,184,.18);
-      border-radius:12px;
-      background:rgba(0,0,0,.18);
-    }
-    .cp-row input[type="text"]{
-      flex:1;
-      margin:0;
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid rgba(148,163,184,.18);
-      background:rgba(0,0,0,.25);
-      color:var(--ink);
-    }
-    .cp-row .cp-del{
-      appearance:none;
-      border:1px solid rgba(148,163,184,.18);
-      background:rgba(239,68,68,.12);
-      color:var(--ink);
-      width:32px;height:32px;
-      border-radius:10px;
-      cursor:pointer;
-      font-weight:800;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .cp-row .cp-del:hover{background:rgba(239,68,68,.2)}
+    .ckpts li{margin:4px 0}
     .foot{
       margin-top:14px;
       color:var(--muted);
@@ -645,7 +589,7 @@
     <header>
       <div style="min-width: 0;">
         <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
-        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V045</span></p>
+        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V044</span></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
@@ -782,7 +726,7 @@
         <button class="x" type="button" data-close="ovOverall">x</button>
       </div>
       <div class="mb">
-      <div class="form two">
+        <div class="form two">
           <div>
             <label for="oBadge">Badge</label>
             <input id="oBadge" />
@@ -871,11 +815,7 @@
           </div>
           <div style="grid-column:1/-1">
             <label for="bCkpts">Checkpoints (one per line)</label>
-            <div id="bCkptsList" class="cp-editor-list"></div>
-            <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-              <input id="bCkptNew" placeholder="Add checkpoint" />
-              <button class="btn small" type="button" id="bCkptAdd">Add</button>
-            </div>
+            <textarea id="bCkpts"></textarea>
           </div>
         </div>
       </div>
@@ -1410,25 +1350,13 @@ const PASS_KEY = "tpb_gate_ok_v1";
       .filter(Boolean);
   }
 
-  function normalizeCheckpointItem(item, fallbackDone = false) {
-    if (!item) return null;
-    if (typeof item === "string") {
-      return { text: item, done: !!fallbackDone };
-    }
-    if (typeof item === "object" && item.text) {
-      return { text: String(item.text).trim(), done: !!item.done };
-    }
-    return null;
-  }
-
   function createBranchFromForm(ev){
     try { ev?.preventDefault?.(); } catch {}
     const rawKey = ($("nbKey")?.value || "").trim();
     const key = sanitizeBranchKey(rawKey);
     const status = ($("nbStatus")?.value || "Planned").trim() || "Planned";
     const progress = clampInt(($("nbProgress")?.value ?? "0"), 0, 100);
-    const checkpointsRaw = splitLinesToArray($("nbCheckpoints")?.value || "");
-    const checkpoints = checkpointsRaw.map(t => ({ text: t, done: false }));
+    const checkpoints = splitLinesToArray($("nbCheckpoints")?.value || "");
 
     if (!key){
       toast("Please enter a branch key (letters/numbers/dashes/underscores).", "warn");
@@ -1562,17 +1490,8 @@ const PASS_KEY = "tpb_gate_ok_v1";
     return clamp(Number.isFinite(n) ? n : 0, min, max);
   }
 
-  function normalizeCheckpoints(text, prior = []) {
-    const priorMap = new Map();
-    prior.forEach(cp => {
-      const key = (cp && cp.text) ? cp.text.trim() : String(cp || "").trim();
-      if (key) priorMap.set(key.toLowerCase(), !!cp.done);
-    });
-    return String(text || "")
-      .split("\n")
-      .map(s => s.trim())
-      .filter(Boolean)
-      .map(t => ({ text: t, done: priorMap.get(t.toLowerCase()) || false }));
+  function normalizeCheckpoints(text) {
+    return text.split("\n").map(s => s.trim()).filter(Boolean);
   }
 
   function normalizeBranchOrder(branches, order) {
@@ -1585,15 +1504,6 @@ const PASS_KEY = "tpb_gate_ok_v1";
   function normalizeState(raw) {
     const safe = raw || {};
     const branches = safe.branches && typeof safe.branches === "object" ? safe.branches : {};
-    Object.keys(branches).forEach(k => {
-      const b = branches[k] || {};
-      const cps = Array.isArray(b.checkpoints) ? b.checkpoints : [];
-      const norm = cps
-        .map(cp => normalizeCheckpointItem(cp))
-        .filter(Boolean)
-        .map(cp => ({ text: cp.text, done: !!cp.done }));
-      branches[k].checkpoints = norm;
-    });
     return {
       overall: safe.overall || STATE.overall,
       branches,
@@ -1847,12 +1757,7 @@ function toast(msg, kind, opts) {
       const statusHtml = `<div class="status"><span>${esc(b.status || "Planned")}</span>${riskBadge}</div>`;
       const isFirst = idx === 0;
       const isLast = idx === visibleKeys.length - 1;
-      const ckpts = (b.checkpoints || []).map((c, i) => {
-        const item = normalizeCheckpointItem(c) || { text: "", done: false };
-        const checked = item.done ? "checked" : "";
-        const cls = item.done ? "cp-text checked" : "cp-text";
-        return `<li><input class="cp-check" type="checkbox" data-branch-key="${esc(key)}" data-cp-index="${i}" ${checked}/><span class="${cls}">${esc(item.text)}</span></li>`;
-      }).join("");
+      const ckpts = (b.checkpoints || []).map(c => `<li>${esc(c)}</li>`).join("");
       return `
         <div class="branch-item" data-branch-key="${esc(key)}">
           <div class="tr">
@@ -2015,55 +1920,6 @@ function toast(msg, kind, opts) {
     if (selected && keys.includes(selected)) sel.value = selected;
   }
 
-  function renderBranchEditorCheckpoints(list) {
-    const container = $("bCkptsList");
-    if (!container) return;
-    const cps = Array.isArray(list) ? list : [];
-    container.innerHTML = cps.map((cp, idx) => {
-      const item = normalizeCheckpointItem(cp) || { text: "", done: false };
-      const checked = item.done ? "checked" : "";
-      return `
-        <div class="cp-row" data-cp-index="${idx}">
-          <input class="cp-check" type="checkbox" ${checked} />
-          <input type="text" class="cp-text-input" value="${esc(item.text)}" placeholder="Checkpoint" />
-          <button class="cp-del" type="button" title="Remove">×</button>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function getBranchEditorCheckpointsFromDOM() {
-    const container = $("bCkptsList");
-    if (!container) return [];
-    const rows = Array.from(container.querySelectorAll(".cp-row"));
-    const result = [];
-    rows.forEach(row => {
-      const textInput = row.querySelector(".cp-text-input");
-      const check = row.querySelector(".cp-check");
-      const text = (textInput?.value || "").trim();
-      if (text) result.push({ text, done: !!check?.checked });
-    });
-    return result;
-  }
-
-  function addBranchEditorCheckpoint(text = "") {
-    const container = $("bCkptsList");
-    if (!container) return;
-    const idx = container.querySelectorAll(".cp-row").length;
-    const checked = "";
-    const row = document.createElement("div");
-    row.className = "cp-row";
-    row.setAttribute("data-cp-index", String(idx));
-    row.innerHTML = `
-      <input class="cp-check" type="checkbox" ${checked} />
-      <input type="text" class="cp-text-input" value="${esc(text)}" placeholder="Checkpoint" />
-      <button class="cp-del" type="button" title="Remove">×</button>
-    `;
-    container.appendChild(row);
-    const input = row.querySelector(".cp-text-input");
-    if (input) input.focus();
-  }
-
   function openBranchEditor(key) {
     fillBranchSelect(key);
     const k = $("bKey").value;
@@ -2076,7 +1932,7 @@ function toast(msg, kind, opts) {
     $("bDueDate").value = meta.dueDate || "";
     $("bTags").value = (meta.tags || []).join(", ");
     $("bProgress").value = String(b.progress ?? 0);
-    renderBranchEditorCheckpoints(b.checkpoints || []);
+    $("bCkpts").value = (b.checkpoints || []).join("\n");
     openOverlay("ovBranch");
   }
 
@@ -2116,7 +1972,7 @@ function toast(msg, kind, opts) {
     STATE.branches[nextKey].status = ($("bStatus").value || "").trim();
     STATE.branches[nextKey].priority = priority;
     STATE.branches[nextKey].progress = clamp(Number($("bProgress").value || 0) || 0, 0, 100);
-    STATE.branches[nextKey].checkpoints = getBranchEditorCheckpointsFromDOM();
+    STATE.branches[nextKey].checkpoints = normalizeCheckpoints(($("bCkpts").value || "").trim());
     setBranchMeta(nextKey, { owner, tags, dueDate, priority });
     STATE.branchOrder = normalizeBranchOrder(STATE.branches, STATE.branchOrder);
 
@@ -2524,7 +2380,7 @@ function toast(msg, kind, opts) {
 
   async function backupDashboardData() {
     const payload = {
-      version: "V045",
+      version: "V044",
       exportedAt: new Date().toISOString(),
       status: JSON.parse(JSON.stringify(STATE)),
       meta: (META && typeof META.meta === "object") ? META.meta : {}
@@ -2726,20 +2582,6 @@ function toast(msg, kind, opts) {
       if (e.key === "Escape") setBackupsMenu(false);
     });
 
-    $("bCkptAdd")?.addEventListener("click", () => {
-      const input = $("bCkptNew");
-      const text = (input?.value || "").trim();
-      addBranchEditorCheckpoint(text);
-      if (input) input.value = "";
-    });
-    const ckptList = $("bCkptsList");
-    ckptList?.addEventListener("click", (e) => {
-      const del = e.target.closest(".cp-del");
-      if (!del) return;
-      const row = del.closest(".cp-row");
-      if (row) row.remove();
-    });
-
     const branchesEl = $("branches");
     branchesEl?.addEventListener("click", (e) => {
       const moveBtn = e.target.closest("[data-move-branch]");
@@ -2753,24 +2595,6 @@ function toast(msg, kind, opts) {
       if (!btn) return;
       const key = btn.getAttribute("data-edit-branch");
       openBranchEditor(key);
-    });
-    branchesEl?.addEventListener("change", (e) => {
-      const cp = e.target.closest(".cp-check");
-      if (!cp) return;
-      const key = cp.getAttribute("data-branch-key");
-      const idx = Number(cp.getAttribute("data-cp-index") || "-1");
-      if (!key || idx < 0) return;
-      const branch = STATE.branches[key];
-      if (!branch || !Array.isArray(branch.checkpoints)) return;
-      if (!branch.checkpoints[idx]) return;
-      branch.checkpoints[idx] = {
-        text: branch.checkpoints[idx].text || String(branch.checkpoints[idx] || ""),
-        done: cp.checked
-      };
-      STATE.updatedAt = new Date().toISOString();
-      saveLocal(STATE);
-      renderAll();
-      markDirty();
     });
     $("filterSearch")?.addEventListener("input", renderBranches);
     $("filterStatus")?.addEventListener("change", renderBranches);
@@ -2883,7 +2707,6 @@ function toast(msg, kind, opts) {
 
 </body>
 </html>
-
 
 
 
