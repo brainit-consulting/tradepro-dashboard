@@ -373,6 +373,15 @@
     }
     .cp-text.checked{color:rgba(148,163,184,.65);text-decoration:line-through;}
     .cp-editor-list{display:flex;flex-direction:column;gap:8px;}
+    .cp-editor-wrap{
+      max-height:240px;
+      overflow:auto;
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:12px;
+      background:rgba(0,0,0,.10);
+      padding:8px;
+      margin-top:6px;
+    }
     .cp-row{
       display:flex;
       align-items:center;
@@ -380,16 +389,17 @@
       padding:6px 8px;
       border:1px solid rgba(148,163,184,.18);
       border-radius:12px;
-      background:rgba(0,0,0,.18);
+      background:rgba(255,255,255,.03);
     }
     .cp-row input[type="text"]{
       flex:1;
       margin:0;
-      padding:8px 10px;
-      border-radius:10px;
+      padding:6px 8px;
+      border-radius:8px;
       border:1px solid rgba(148,163,184,.18);
-      background:rgba(0,0,0,.25);
+      background:rgba(0,0,0,.18);
       color:var(--ink);
+      min-width:0;
     }
     .cp-row .cp-del{
       appearance:none;
@@ -870,8 +880,13 @@
             <input id="bTags" placeholder="ops, qa, crm" />
           </div>
           <div style="grid-column:1/-1">
-            <label for="bCkpts">Checkpoints (one per line)</label>
-            <div id="bCkptsList" class="cp-editor-list"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <label for="bCkpts">Checkpoints</label>
+              <button class="btn ghost small" type="button" id="bCkptsToggle">Collapse</button>
+            </div>
+            <div id="bCkptsWrap" class="cp-editor-wrap">
+              <div id="bCkptsList" class="cp-editor-list"></div>
+            </div>
             <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
               <input id="bCkptNew" placeholder="Add checkpoint" />
               <button class="btn small" type="button" id="bCkptAdd">Add</button>
@@ -2030,6 +2045,10 @@ function toast(msg, kind, opts) {
         </div>
       `;
     }).join("");
+    const wrap = $("bCkptsWrap");
+    if (wrap) wrap.style.display = "block";
+    const toggle = $("bCkptsToggle");
+    if (toggle) toggle.textContent = "Collapse";
   }
 
   function getBranchEditorCheckpointsFromDOM() {
@@ -2062,6 +2081,15 @@ function toast(msg, kind, opts) {
     container.appendChild(row);
     const input = row.querySelector(".cp-text-input");
     if (input) input.focus();
+  }
+
+  function toggleBranchEditorCheckpoints() {
+    const wrap = $("bCkptsWrap");
+    const btn = $("bCkptsToggle");
+    if (!wrap || !btn) return;
+    const isHidden = wrap.style.display === "none";
+    wrap.style.display = isHidden ? "block" : "none";
+    btn.textContent = isHidden ? "Collapse" : "Expand";
   }
 
   function openBranchEditor(key) {
@@ -2732,6 +2760,7 @@ function toast(msg, kind, opts) {
       addBranchEditorCheckpoint(text);
       if (input) input.value = "";
     });
+    $("bCkptsToggle")?.addEventListener("click", toggleBranchEditorCheckpoints);
     const ckptList = $("bCkptsList");
     ckptList?.addEventListener("click", (e) => {
       const del = e.target.closest(".cp-del");
