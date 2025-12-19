@@ -1,0 +1,25 @@
+{
+  "name": "tradepro-dashboard",
+  "version": "1.0.0",
+  "description": "Learn more at https://brainitconsulting.com/trade-pros-1",
+  "main": "run_dashboard_tests.js",
+  "scripts": {
+    "test": "npm run test:e2e",
+    "test:e2e": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brainit-consulting/tradepro-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/brainit-consulting/tradepro-dashboard/issues"
+  },
+  "homepage": "https://github.com/brainit-consulting/tradepro-dashboard#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}
