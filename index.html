@@ -8,7 +8,7 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="stylesheet" href="tradepro_dashboard_v048.css" />
+  <link rel="stylesheet" href="tradepro_dashboard_v049.css" />
 </head>
 
 <body>
@@ -34,7 +34,7 @@
     <header>
       <div style="min-width: 0;">
         <h1 class="h-title">TradeProBuddy™ Project Dashboard</h1>
-        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V048</span></p>
+        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version">• Build: V049</span></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
@@ -260,9 +260,14 @@
             <input id="bTags" placeholder="ops, qa, crm" />
           </div>
           <div style="grid-column:1/-1">
-            <label for="bCkpts">Checkpoints (one per line)</label>
-            <div id="bCkptsList" class="cp-editor-list"></div>
-            <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+            <div class="cp-editor-header">
+              <label for="bCkpts">Checkpoints (one per line)</label>
+              <button class="btn ghost small" type="button" id="bCkptToggle" aria-expanded="true">Collapse</button>
+            </div>
+            <div id="bCkptsWrap" class="cp-editor-wrap">
+              <div id="bCkptsList" class="cp-editor-list"></div>
+            </div>
+            <div class="cp-editor-actions">
               <input id="bCkptNew" placeholder="Add checkpoint" />
               <button class="btn small" type="button" id="bCkptAdd">Add</button>
             </div>
@@ -455,7 +460,7 @@
   </div>
 
 
-<script src="tradepro_dashboard_v048.js"></script>
+<script src="tradepro_dashboard_v049.js"></script>
 
   <div id="loadingOverlay" style="display:none; position:fixed; inset:0; z-index:2000; align-items:center; justify-content:center; background:rgba(0,0,0,.55); backdrop-filter: blur(4px);">
     <div style="min-width:min(520px,92vw); max-width:720px; padding:18px 18px; border-radius:18px; background:rgba(16,22,32,.72); border:1px solid rgba(255,255,255,.10); box-shadow:0 20px 60px rgba(0,0,0,.55);">
