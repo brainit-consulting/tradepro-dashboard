@@ -506,6 +506,31 @@
       background:rgba(0,0,0,.16);
       min-height:44px;
     }
+    .cp-row .cp-check{
+      width:18px;height:18px;
+      border-radius:6px;
+      border:1px solid rgba(148,163,184,.28);
+      background:rgba(0,0,0,.25);
+      appearance:none;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      flex:0 0 auto;
+      padding:0;
+      margin:0;
+    }
+    .cp-row .cp-check:checked{
+      border-color:rgba(52,211,153,.5);
+      background:rgba(52,211,153,.2);
+    }
+    .cp-row .cp-check:checked:after{
+      content:"";
+      width:8px;height:8px;border-radius:3px;
+      background:rgba(52,211,153,.9);
+      display:block;
+    }
     .cp-row input[type="text"]{
       flex:1;
       margin:0;
