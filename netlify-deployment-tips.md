@@ -23,6 +23,12 @@ These steps let you host the dashboard for free on Netlify without using Git.
 - Manual method: repeat the drag-and-drop deploy with your updated `index.html` (or the whole folder).
 - Git method (optional): connect the repo to Netlify so pushes automatically deploy (helpful once you’re comfortable with Git-based workflows).
 
+## Inactivity and cleanup notes (Free plan)
+
+- **Deploy history cleanup:** Netlify may automatically delete *old deploys* (build artifacts) after ~30 days on Free plans, except for the currently published deploy and a small set of most-recent successful deploys (production/branch).
+- **Inactive sites (recommendation):** Sites with no builds for 90+ days can be considered “inactive.” Netlify recommends triggering a new build or deleting inactive sites for security hygiene; this is guidance, not necessarily an automatic deletion rule.
+- **Special case — unclaimed GPT-created sites:** Sites created via Netlify’s GPT action that are not claimed by a user can be taken offline and deleted quickly (anti-spam behavior). This does not typically apply to normal, claimed sites you manage in your account.
+
 ---
 
 *Footnote: Other free static-hosting options include Cloudflare Pages, Vercel, Firebase Hosting (free tier), and Render static sites (free tier).*
