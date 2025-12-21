@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BrainIT™ Project Dashboard</title>
+  <title>TradeProBuddy™ Project Dashboard</title>
   <meta name="color-scheme" content="dark light" />
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
   <meta http-equiv="Pragma" content="no-cache" />
@@ -251,47 +251,17 @@
     .btn.ghost:hover{background:rgba(0,0,0,.28)}
     .btn.small{padding:8px 10px;border-radius:12px;font-weight:650}
     .btn.small{min-width:62px;justify-content:center;white-space:nowrap}
-    .theme-switch{
-      display:inline-flex;align-items:center;gap:8px;
-      cursor:pointer;
-      font-weight:700;
-      user-select:none;
-      position:relative;
+    .theme-toggle{font-weight:700;gap:6px;}
+    .theme-chip{
+      width:12px;height:12px;border-radius:50%;
+      border:2px solid rgba(255,255,255,.5);
+      background:rgba(255,255,255,.35);
+      display:inline-block;
     }
-    .theme-switch input{
-      position:absolute;
-      opacity:0;
-      width:1px;
-      height:1px;
-      pointer-events:none;
+    body[data-theme="light"] .theme-chip{
+      border-color:rgba(15,23,42,.2);
+      background:rgba(15,23,42,.2);
     }
-    .switch-track{
-      width:48px;height:24px;
-      border-radius:999px;
-      background:rgba(255,255,255,.18);
-      border:1px solid var(--line);
-      display:inline-flex;
-      align-items:center;
-      padding:2px;
-      transition:background .2s ease,border-color .2s ease;
-    }
-    .switch-thumb{
-      width:18px;height:18px;border-radius:50%;
-      background:linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.65));
-      box-shadow:0 6px 14px rgba(0,0,0,.35);
-      transform:translateX(0);
-      transition:transform .2s ease, background .2s ease;
-    }
-    .theme-switch:focus-within .switch-track{box-shadow:0 0 0 3px rgba(52,211,153,.25)}
-    .theme-switch[data-checked="true"] .switch-track{
-      background:linear-gradient(90deg, rgba(52,211,153,.28), rgba(123,63,160,.26));
-      border-color:rgba(148,163,184,.28);
-    }
-    .theme-switch[data-checked="true"] .switch-thumb{
-      transform:translateX(22px);
-      background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.78));
-    }
-    .switch-text{font-weight:700;}
     .grid{
       display:grid;gap:14px;margin-top:16px;
       grid-template-columns:repeat(12,1fr);
@@ -754,33 +724,6 @@
       grid-template-columns:1fr;
       gap:12px;
     }
-    .field-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;align-items:end;}
-    .slider-row{display:flex;align-items:center;gap:10px}
-    .slider-row .slider-value{min-width:46px;text-align:right;font-weight:700;color:var(--muted)}
-    input[type="range"]{
-      width:100%;
-      appearance:none;
-      height:6px;
-      border-radius:999px;
-      background:rgba(255,255,255,.14);
-      border:1px solid rgba(148,163,184,.28);
-      outline:none;
-    }
-    input[type="range"]::-webkit-slider-thumb{
-      appearance:none;
-      width:16px;height:16px;border-radius:50%;
-      background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
-      border:1px solid rgba(148,163,184,.36);
-      box-shadow:0 4px 10px rgba(0,0,0,.35);
-      cursor:pointer;
-    }
-    input[type="range"]::-moz-range-thumb{
-      width:16px;height:16px;border-radius:50%;
-      background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
-      border:1px solid rgba(148,163,184,.36);
-      box-shadow:0 4px 10px rgba(0,0,0,.35);
-      cursor:pointer;
-    }
     @media(min-width:860px){ .form.two{grid-template-columns:1fr 1fr} }
     label{display:block;font-size:.85rem;color:var(--muted);margin:0 0 6px}
     input, textarea, select{
@@ -947,7 +890,7 @@
   <div id="gate" aria-modal="true" role="dialog">
     <div class="gate-card">
       <div class="top">
-        <h2 id="gateTitle">BrainIT™ Project Dashboard</h2>
+        <h2>TradeProBuddy™ Dashboard</h2>
         <p><span class="dot"></span> Protected view</p>
       </div>
       <div class="mid">
@@ -965,8 +908,8 @@
     <div class="wrap" id="app">
     <header>
       <div style="min-width: 0;">
-        <h1 class="h-title" id="titleText">BrainIT™ Project Dashboard</h1>
-        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version"> Build: V058</span></p>
+        <h1 class="h-title" id="titleText">TradeProBuddy™ Project Dashboard</h1>
+        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version"> Build: V057</span></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
@@ -978,11 +921,10 @@
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px">
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-          <label class="theme-switch" id="themeSwitch" aria-label="Toggle light or dark theme">
-            <input type="checkbox" id="themeToggleSwitch" role="switch" aria-checked="false" />
-            <span class="switch-track"><span class="switch-thumb"></span></span>
-            <span class="switch-text" id="themeToggleLabel">Dark mode</span>
-          </label>
+          <button class="btn small ghost theme-toggle" type="button" id="btnThemeToggle" aria-pressed="false" title="Toggle light or dark theme">
+            <span class="theme-chip" aria-hidden="true"></span>
+            <span id="themeToggleLabel">Dark mode</span>
+          </button>
           <span class="badge"><span class="dot"></span><span id="overallBadge">-</span></span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
@@ -1100,7 +1042,7 @@
       </section>
     </div>
 
-    <div class="foot" id="footerBrand">© 2025 BrainIT Consulting • BrainIT™ Project Dashboard</div>
+    <div class="foot">© 2025 BrainIT Consulting • TradeProBuddy™ Internal Dashboard</div>
   </div>
 
   <!-- MODALS -->
@@ -1193,18 +1135,13 @@
             <label for="bDueDate">Due Date</label>
             <input id="bDueDate" type="date" />
           </div>
-          <div class="field-row">
-            <div>
-              <label for="bProgress">Progress (0-100)</label>
-              <div class="slider-row">
-                <input id="bProgress" type="range" min="0" max="100" step="1" />
-                <span class="slider-value" id="bProgressValue">0%</span>
-              </div>
-            </div>
-            <div>
-              <label for="bTags">Tags (comma separated)</label>
-              <input id="bTags" placeholder="ops, qa, crm" />
-            </div>
+          <div style="grid-column:1/-1">
+            <label for="bProgress">Progress (0-100)</label>
+            <input id="bProgress" type="number" min="0" max="100" step="1" />
+          </div>
+          <div style="grid-column:1/-1">
+            <label for="bTags">Tags (comma separated)</label>
+            <input id="bTags" placeholder="ops, qa, crm" />
           </div>
           <div style="grid-column:1/-1">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -1388,11 +1325,8 @@
           </div>
 
           <div class="field">
-            <label>Progress (0-100)</label>
-            <div class="slider-row">
-              <input id="nbProgress" type="range" min="0" max="100" step="1" value="0" />
-              <span class="slider-value" id="nbProgressValue">0%</span>
-            </div>
+            <label>Progress (0—100)</label>
+            <input id="nbProgress" type="number" min="0" max="100" step="1" value="0" />
           </div>
 
           <div class="field" style="grid-column:1/-1;">
@@ -1418,7 +1352,7 @@
 
   const STORAGE_KEY = "tpb_status_v1";
   const META_KEY = "tpb_branch_meta_v1";
-  const DEFAULT_TITLE = "BrainIT\u2122 Project Dashboard";
+  const DEFAULT_TITLE = "TradeProBuddy\u2122 Project Dashboard";
   const DEFAULT_OWNER = "Emile";
   const RISK_DAYS = 7;
   const RISK_PROGRESS = 50;
@@ -1457,19 +1391,13 @@
     document.body.setAttribute("data-theme", next);
     const label = $("themeToggleLabel");
     if (label) label.textContent = next === "light" ? "Light mode" : "Dark mode";
-    const sw = $("themeToggleSwitch");
-    const wrap = $("themeSwitch");
-    if (sw) {
-      sw.checked = next === "light";
-      sw.setAttribute("aria-checked", sw.checked ? "true" : "false");
-    }
-    if (wrap) wrap.setAttribute("data-checked", sw && sw.checked ? "true" : "false");
+    const btn = $("btnThemeToggle");
+    if (btn) btn.setAttribute("aria-pressed", next === "light" ? "true" : "false");
   }
 
-  function toggleTheme(fromSwitch) {
-    const sw = $("themeToggleSwitch");
+  function toggleTheme() {
     const current = document.body.getAttribute("data-theme") === "light" ? "light" : "dark";
-    const next = sw ? (sw.checked ? "light" : "dark") : (current === "light" ? "dark" : "light");
+    const next = current === "light" ? "dark" : "light";
     applyTheme(next);
     saveTheme(next);
   }
@@ -1769,7 +1697,6 @@ const PASS_KEY = "tpb_gate_ok_v1";
     $("nbKey").value = "";
     $("nbStatus").value = "Planned";
     $("nbProgress").value = 0;
-    syncSliderValue("nbProgress", "nbProgressValue");
     $("nbCheckpoints").value = "";
     ov.classList.add("show");
     ov.setAttribute("aria-hidden", "false");
@@ -1975,15 +1902,6 @@ const PASS_KEY = "tpb_gate_ok_v1";
     return clamp(Number.isFinite(n) ? n : 0, min, max);
   }
 
-  function syncSliderValue(rangeId, labelId) {
-    const input = $(rangeId);
-    const label = $(labelId);
-    if (!input || !label) return;
-    const val = clampInt(input.value, 0, 100);
-    input.value = val;
-    label.textContent = `${val}%`;
-  }
-
   function normalizeCheckpoints(text, prior = []) {
     const priorMap = new Map();
     prior.forEach(cp => {
@@ -2076,11 +1994,7 @@ function toast(msg, kind, opts) {
     const title = (STATE.title || DEFAULT_TITLE).trim() || DEFAULT_TITLE;
     const el = $("titleText");
     if (el) el.textContent = title;
-    document.title = title || "BrainIT\u2122 Project Dashboard";
-    const gate = $("gateTitle");
-    if (gate) gate.textContent = title;
-    const footer = $("footerBrand");
-    if (footer) footer.textContent = "\u00a9 2025 BrainIT Consulting \u2022 " + title;
+    document.title = title || "TradeProBuddy\u2122 Project Dashboard";
   }
 
   function renderAll() {
@@ -2549,7 +2463,6 @@ function toast(msg, kind, opts) {
     $("bDueDate").value = meta.dueDate || "";
     $("bTags").value = (meta.tags || []).join(", ");
     $("bProgress").value = String(b.progress ?? 0);
-    syncSliderValue("bProgress", "bProgressValue");
     renderBranchEditorCheckpoints(b.checkpoints || []);
     openOverlay("ovBranch");
   }
@@ -2998,7 +2911,7 @@ function toast(msg, kind, opts) {
 
   async function backupDashboardData() {
     const payload = {
-      version: "V058",
+      version: "V057",
       exportedAt: new Date().toISOString(),
       status: JSON.parse(JSON.stringify(STATE)),
       meta: (META && typeof META.meta === "object") ? META.meta : {}
@@ -3122,7 +3035,7 @@ function toast(msg, kind, opts) {
     openDashboardRestoreConfirm(summary);
   }
   function bind() {
-    $("themeToggleSwitch")?.addEventListener("change", () => toggleTheme(true));
+    $("btnThemeToggle")?.addEventListener("click", toggleTheme);
     $("btnEditTitle")?.addEventListener("click", editTitle);
     $("btnEditOverall")?.addEventListener("click", openOverallEditor);
     $("btnEditBranch")?.addEventListener("click", () => {
@@ -3140,8 +3053,6 @@ function toast(msg, kind, opts) {
     $("nbCreate")?.addEventListener("click", createBranchFromForm);
     $("nbKey")?.addEventListener("keydown", (e) => { if (e.key === "Enter") createBranchFromForm(); });
     $("nbProgress")?.addEventListener("keydown", (e) => { if (e.key === "Enter") createBranchFromForm(); });
-    $("bProgress")?.addEventListener("input", () => syncSliderValue("bProgress", "bProgressValue"));
-    $("nbProgress")?.addEventListener("input", () => syncSliderValue("nbProgress", "nbProgressValue"));
     $("btnServerSettings")?.addEventListener("click", openServerSettings);
     $("btnSyncServer")?.addEventListener("click", saveToServer);
     $("btnRefreshServer")?.addEventListener("click", refreshFromServer);
@@ -3370,3 +3281,6 @@ function toast(msg, kind, opts) {
 
 </body>
 </html>
+
+
+
