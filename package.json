@@ -4,6 +4,7 @@
   "description": "Learn more at https://brainitconsulting.com/trade-pros-1",
   "main": "run_dashboard_tests.js",
   "scripts": {
+    "lint": "eslint index.html",
     "test": "npm run test:e2e",
     "test:e2e": "playwright test"
   },
@@ -20,6 +21,8 @@
   },
   "homepage": "https://github.com/brainit-consulting/tradepro-dashboard#readme",
   "devDependencies": {
-    "@playwright/test": "^1.57.0"
+    "@playwright/test": "^1.57.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-html": "^7.1.0"
   }
 }
