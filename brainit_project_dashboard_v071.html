@@ -843,8 +843,12 @@
     }
     input[type="date"]::-webkit-calendar-picker-indicator{
       filter:invert(1);
-      opacity:.85;
+      opacity:1;
       cursor:pointer;
+      background:rgba(255,255,255,.12);
+      border-radius:8px;
+      padding:6px;
+      box-shadow:0 0 0 1px rgba(255,255,255,.16);
     }
     textarea{min-height:150px;resize:vertical;line-height:1.4}
     input:focus, textarea:focus, select:focus{border-color:rgba(52,211,153,.45)}
