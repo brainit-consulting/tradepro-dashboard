@@ -428,6 +428,17 @@
       position:relative;
       overflow:hidden;
     }
+    .branch-title{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%, -50%);
+      font-weight:750;
+      pointer-events:none;
+      text-align:center;
+      width:max(200px, 40%);
+    }
+    .tr .area{display:none;}
     .branch-item{margin-bottom:12px}
     .branch-item:last-child{margin-bottom:0}
     .area{font-weight:750;text-align:center;justify-self:center}
@@ -988,7 +999,7 @@
     <header>
       <div style="min-width: 0;">
         <h1 class="h-title" id="titleText">BrainIT™ Project Dashboard</h1>
-        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version"> Build: V066</span></p>
+        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version"> Build: V067</span></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
@@ -2405,6 +2416,7 @@ function toast(msg, kind, opts) {
             </div>
             <button class="collapse-btn" type="button" data-toggle-branch="${esc(key)}" aria-expanded="${!collapsed}">${collapsed ? "▸" : "▾"}</button>
             <div class="area">${esc(formatBranchName(key))}</div>
+            <div class="branch-title">${esc(formatBranchName(key))}</div>
             ${statusHtml}
             <div class="bar"><i style="width:${b.progress || 0}%"></i></div>
             <button class="btn small" data-edit-branch="${esc(key)}">Edit</button>
@@ -3100,7 +3112,7 @@ function toast(msg, kind, opts) {
 
   async function backupDashboardData() {
     const payload = {
-      version: "V066",
+      version: "V067",
       exportedAt: new Date().toISOString(),
       status: JSON.parse(JSON.stringify(STATE)),
       meta: (META && typeof META.meta === "object") ? META.meta : {}
