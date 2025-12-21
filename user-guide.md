@@ -29,8 +29,9 @@ Tip: The site link `?v=054` is typically used as a **cache buster**. The dashboa
   - Branch collapse state
   - Server settings (Read URL / Save URL / API key / updated-by)
   - Theme preference (light/dark)
-- Optional “server-first” sync:
+- Optional "server-first" sync:
   - If server settings exist, the app can fetch the latest state on load and supports Save/Refresh actions.
+  - n8n workflow JSONs are available for Pro Users (Paid Plan) at $10 per license.
 
 ## Buttons and UI (what each does)
 
@@ -97,7 +98,20 @@ Typical setup:
 - Branch: `main`
 - Folder: `/ (root)`
 
-When you push changes to `main`, Pages rebuilds. For this static site, it’s usually **under a couple of minutes**.
+When you push changes to `main`, Pages rebuilds. For this static site, it's usually **under a couple of minutes**.
+
+## Deploying (Netlify - manual drag and drop)
+
+Netlify lets you host a static site on the free plan (90+ days inactive is often their cutoff guidance).
+
+1. Create a local folder and place `index.html` inside it.
+2. Go to `https://app.netlify.com/` and choose **Add new site** -> **Deploy manually**.
+3. Drag the folder into the deploy area.
+4. Rename your site in **Site configuration** -> **Change site name**.
+
+Notes (from Netlify guidance):
+- Re-deploy any time by dragging the updated folder again.
+- If a site is inactive for ~90+ days, Netlify recommends triggering a fresh deploy.
 
 ## Browser sanity checklist
 
