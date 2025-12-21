@@ -4,12 +4,9 @@ module.exports = {
     es2021: true
   },
   plugins: ["html"],
-  overrides: [
-    {
-      files: ["**/*.html"],
-      processor: "html/html"
-    }
-  ],
+  settings: {
+    "html/html-extensions": [".html"]
+  },
   rules: {
     eqeqeq: "warn",
     "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }]

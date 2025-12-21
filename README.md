@@ -11,3 +11,4 @@ Learn more at https://brainitconsulting.com/trade-pros-1
 
 - Install deps once: `npm install`.
 - Run the linter: `npm run lint` (targets `index.html` and lints the embedded script via `eslint-plugin-html`).
+- Current policy: warnings are acceptable; we use lint as a heads-up check without fixing all warnings immediately.
