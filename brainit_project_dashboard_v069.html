@@ -1529,7 +1529,7 @@
     if (wrap) wrap.setAttribute("data-checked", sw && sw.checked ? "true" : "false");
   }
 
-  function toggleTheme(fromSwitch) {
+  function toggleTheme(_fromSwitch) {
     const sw = $("themeToggleSwitch");
     const current = document.body.getAttribute("data-theme") === "light" ? "light" : "dark";
     const next = sw ? (sw.checked ? "light" : "dark") : (current === "light" ? "dark" : "light");
@@ -1553,7 +1553,7 @@
       SERVER_META.label = "Server";
     }
     updateSavePill();
-    if (SERVER_META.revision == null) refreshServerMetaOnly();
+    if (SERVER_META.revision === null || SERVER_META.revision === undefined) refreshServerMetaOnly();
   }
 
   function normalizePayload(payload) {
@@ -1649,16 +1649,16 @@
       if (!res.ok) return;
       const data = await res.json().catch(() => ({}));
       const meta = extractServerMeta(data);
-      if (meta.revision != null) SERVER_META.revision = meta.revision;
-      if (meta.updated_at != null) SERVER_META.updated_at = meta.updated_at;
-      if (meta.updated_by != null) SERVER_META.updated_by = meta.updated_by;
+      if (meta.revision !== null && meta.revision !== undefined) SERVER_META.revision = meta.revision;
+      if (meta.updated_at !== null && meta.updated_at !== undefined) SERVER_META.updated_at = meta.updated_at;
+      if (meta.updated_by !== null && meta.updated_by !== undefined) SERVER_META.updated_by = meta.updated_by;
       updateSavePill();
     } catch {
       // ignore meta refresh failures
     }
   }
 
-  function requestAutosave(source) {
+  function requestAutosave(_source) {
     const cfg = getServerSettings();
     if (!cfg.saveUrl || !cfg.apiKey) return;
     if (SAVE_IN_FLIGHT) return;
@@ -1701,7 +1701,13 @@
       const meta = extractServerMeta(dataRaw);
       const remoteRev = meta.revision ?? null;
 
-      if (remoteRev != null && SERVER_META.revision != null && remoteRev > SERVER_META.revision) {
+      if (
+        remoteRev !== null &&
+        remoteRev !== undefined &&
+        SERVER_META.revision !== null &&
+        SERVER_META.revision !== undefined &&
+        remoteRev > SERVER_META.revision
+      ) {
         toast("Server has a newer revision (rev " + remoteRev + "). Refresh first to avoid overwrite.", "warn");
         return true;
       }
@@ -1901,8 +1907,7 @@ const PASS_KEY = "tpb_gate_ok_v1";
     const keyNorm = normalizeBranchKeyForCompare(key);
     const status = ($("nbStatus")?.value || "Planned").trim() || "Planned";
     const progress = clampInt(($("nbProgress")?.value ?? "0"), 0, 100);
-    const checkpointsRaw = splitLinesToArray($("nbCheckpoints")?.value || "");
-    const checkpoints = checkpointsRaw.map(t => ({ text: t, done: false }));
+    const checkpoints = normalizeCheckpoints($("nbCheckpoints")?.value || "", []);
 
     if (!key){
       toast("Please enter a branch name (letters/numbers/spaces).", "warn");
@@ -2074,10 +2079,7 @@ const PASS_KEY = "tpb_gate_ok_v1";
       const key = (cp && cp.text) ? cp.text.trim() : String(cp || "").trim();
       if (key) priorMap.set(key.toLowerCase(), !!cp.done);
     });
-    return String(text || "")
-      .split("\n")
-      .map(s => s.trim())
-      .filter(Boolean)
+    return splitLinesToArray(text)
       .map(t => ({ text: t, done: priorMap.get(t.toLowerCase()) || false }));
   }
 
@@ -2110,8 +2112,6 @@ const PASS_KEY = "tpb_gate_ok_v1";
     };
   }
 
-  let toastTimeout;
-  
   function setLoading(isLoading, label) {
     const el = document.getElementById("loadingOverlay");
     const txt = document.getElementById("loadingText");
@@ -2509,21 +2509,21 @@ function toast(msg, kind, opts) {
   }
 
   function markServerLoaded(meta) {
-    if (meta && meta.revision != null) SERVER_META.revision = meta.revision;
-    if (meta && meta.updated_at != null) SERVER_META.updated_at = meta.updated_at;
-    if (meta && meta.updated_by != null) SERVER_META.updated_by = meta.updated_by;
+    if (meta && meta.revision !== null && meta.revision !== undefined) SERVER_META.revision = meta.revision;
+    if (meta && meta.updated_at !== null && meta.updated_at !== undefined) SERVER_META.updated_at = meta.updated_at;
+    if (meta && meta.updated_by !== null && meta.updated_by !== undefined) SERVER_META.updated_by = meta.updated_by;
     SERVER_META.state = "ok";
     SERVER_META.label = "Server";
     HAS_REFRESHED = true;
     clearDirty();
     updateSavePill();
-    if (SERVER_META.revision == null) refreshServerMetaOnly();
+    if (SERVER_META.revision === null || SERVER_META.revision === undefined) refreshServerMetaOnly();
   }
 
   function markServerSaved(meta) {
-    if (meta && meta.revision != null) SERVER_META.revision = meta.revision;
-    if (meta && meta.updated_at != null) SERVER_META.updated_at = meta.updated_at;
-    if (meta && meta.updated_by != null) SERVER_META.updated_by = meta.updated_by;
+    if (meta && meta.revision !== null && meta.revision !== undefined) SERVER_META.revision = meta.revision;
+    if (meta && meta.updated_at !== null && meta.updated_at !== undefined) SERVER_META.updated_at = meta.updated_at;
+    if (meta && meta.updated_by !== null && meta.updated_by !== undefined) SERVER_META.updated_by = meta.updated_by;
     SERVER_META.state = "ok";
     SERVER_META.label = "Saved ✓";
     clearDirty();
@@ -2965,7 +2965,7 @@ function toast(msg, kind, opts) {
       }
       const data = await res.json().catch(() => ({}));
       const meta = extractServerMeta(data);
-      const revText = meta.revision != null ? `rev ${meta.revision}` : "rev -";
+      const revText = meta.revision !== null && meta.revision !== undefined ? `rev ${meta.revision}` : "rev -";
       toast(`Connection ok (${revText}, ${ms}ms)`, "ok");
     } catch (e) {
       toast("Connection failed: " + e.message, "danger");

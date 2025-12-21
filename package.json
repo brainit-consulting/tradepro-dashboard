@@ -1,5 +1,5 @@
 {
-  "name": "tradepro-dashboard",
+  "name": "brainit-dashboard-project",
   "version": "1.0.0",
   "description": "Learn more at https://brainitconsulting.com/trade-pros-1",
   "main": "run_dashboard_tests.js",
@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brainit-consulting/tradepro-dashboard.git"
+    "url": "git+https://github.com/brainit-consulting/brainit-dashboard-project.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/brainit-consulting/tradepro-dashboard/issues"
+    "url": "https://github.com/brainit-consulting/brainit-dashboard-project/issues"
   },
-  "homepage": "https://github.com/brainit-consulting/tradepro-dashboard#readme",
+  "homepage": "https://github.com/brainit-consulting/brainit-dashboard-project#readme",
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "eslint": "^8.57.0",

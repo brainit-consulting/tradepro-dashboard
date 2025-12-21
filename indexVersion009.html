@@ -580,7 +580,7 @@
           </div>
           <div data-pub="github">
             <label for="ghRepo">GitHub repo</label>
-            <input id="ghRepo" placeholder="tradepro-dashboard" />
+            <input id="ghRepo" placeholder="brainit-dashboard-project" />
           </div>
           <div data-pub="github">
             <label for="ghBranch">Branch</label>
@@ -673,7 +673,7 @@
     // IMPORTANT: change this to your own passcode
     const PASSCODE = "tradepro";
 
-    const REMOTE_STATUS_URL = "https://raw.githubusercontent.com/brainit-consulting/tradepro-dashboard/main/status.json";
+    const REMOTE_STATUS_URL = "https://raw.githubusercontent.com/brainit-consulting/brainit-dashboard-project/main/status.json";
 
     const DEFAULT_DATA = {
       updatedAt: new Date().toISOString(),
@@ -1003,7 +1003,7 @@
       $("pubToken").value = localStorage.getItem(TPB_PUBLISH_TOKEN) || "";
 
       $("ghOwner").value = localStorage.getItem(TPB_GH_OWNER) || "brainit-consulting";
-      $("ghRepo").value = localStorage.getItem(TPB_GH_REPO) || "tradepro-dashboard";
+      $("ghRepo").value = localStorage.getItem(TPB_GH_REPO) || "brainit-dashboard-project";
       $("ghBranch").value = localStorage.getItem(TPB_GH_BRANCH) || "main";
       $("ghPat").value = localStorage.getItem(TPB_GH_PAT) || "";
 

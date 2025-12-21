@@ -1,7 +1,7 @@
 {
   "config": {
-    "configFile": "C:\\Users\\snake\\Downloads\\TradeProBuddy Reports And Code\\tradepro-dashboard\\playwright.config.ts",
-    "rootDir": "C:/Users/snake/Downloads/TradeProBuddy Reports And Code/tradepro-dashboard/tests",
+    "configFile": "H:\\BrainITProjects\\brainit-dashboard-project\\playwright.config.ts",
+    "rootDir": "H:/BrainITProjects/brainit-dashboard-project/tests",
     "forbidOnly": false,
     "fullyParallel": true,
     "globalSetup": null,
@@ -26,7 +26,7 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "C:/Users/snake/Downloads/TradeProBuddy Reports And Code/tradepro-dashboard/test-results",
+        "outputDir": "H:/BrainITProjects/brainit-dashboard-project/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -34,7 +34,7 @@
         },
         "id": "chromium",
         "name": "chromium",
-        "testDir": "C:/Users/snake/Downloads/TradeProBuddy Reports And Code/tradepro-dashboard/tests",
+        "testDir": "H:/BrainITProjects/brainit-dashboard-project/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -42,7 +42,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/snake/Downloads/TradeProBuddy Reports And Code/tradepro-dashboard/test-results",
+        "outputDir": "H:/BrainITProjects/brainit-dashboard-project/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -50,7 +50,7 @@
         },
         "id": "edge",
         "name": "edge",
-        "testDir": "C:/Users/snake/Downloads/TradeProBuddy Reports And Code/tradepro-dashboard/tests",
+        "testDir": "H:/BrainITProjects/brainit-dashboard-project/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -58,7 +58,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "C:/Users/snake/Downloads/TradeProBuddy Reports And Code/tradepro-dashboard/test-results",
+        "outputDir": "H:/BrainITProjects/brainit-dashboard-project/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -66,7 +66,7 @@
         },
         "id": "webkit",
         "name": "webkit",
-        "testDir": "C:/Users/snake/Downloads/TradeProBuddy Reports And Code/tradepro-dashboard/tests",
+        "testDir": "H:/BrainITProjects/brainit-dashboard-project/tests",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"

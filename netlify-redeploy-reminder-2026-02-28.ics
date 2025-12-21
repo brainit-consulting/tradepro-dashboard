@@ -1,13 +1,13 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//TradePro Dashboard//Netlify Reminder//EN
+PRODID:-//BrainIT Dashboard Project//Netlify Reminder//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
-UID:tradepro-dashboard-netlify-redeploy-20260228@local
+UID:brainit-dashboard-project-netlify-redeploy-20260228@local
 DTSTAMP:20251220T000000Z
 SUMMARY:Netlify: trigger a new deploy (keep site active)
-DESCRIPTION:Reminder to trigger a Netlify rebuild/redeploy to avoid long inactivity windows. You can redeploy by dragging your updated folder (e.g. H:\\TradePro-Dashboard-Site) into Netlify again.
+DESCRIPTION:Reminder to trigger a Netlify rebuild/redeploy to avoid long inactivity windows. You can redeploy by dragging your updated folder (e.g. H:\\BrainITProjects\\brainit-dashboard-project) into Netlify again.
 DTSTART;VALUE=DATE:20260228
 DTEND;VALUE=DATE:20260301
 END:VEVENT
