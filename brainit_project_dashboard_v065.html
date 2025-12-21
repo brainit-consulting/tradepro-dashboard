@@ -430,7 +430,7 @@
     }
     .branch-item{margin-bottom:12px}
     .branch-item:last-child{margin-bottom:0}
-    .area{font-weight:750;text-align:center;justify-self:center}
+    .area{font-weight:750}
     .status{
       color:var(--muted);
       font-weight:650;
@@ -988,7 +988,7 @@
     <header>
       <div style="min-width: 0;">
         <h1 class="h-title" id="titleText">BrainIT™ Project Dashboard</h1>
-        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version"> Build: V066</span></p>
+        <p class="h-sub">Server-backed view + editable data (saved to your server).<span class="build-version"> Build: V065</span></p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
           <span class="pill"><span class="dot"></span><b>Owner:</b> Emile (BrainIT Consulting)</span>
           <span class="pill" title="Stored as ISO UTC in status.json; displayed here in your local time zone."><b>Updated:</b> <span id="updatedAt">-</span></span>
@@ -3100,7 +3100,7 @@ function toast(msg, kind, opts) {
 
   async function backupDashboardData() {
     const payload = {
-      version: "V066",
+      version: "V065",
       exportedAt: new Date().toISOString(),
       status: JSON.parse(JSON.stringify(STATE)),
       meta: (META && typeof META.meta === "object") ? META.meta : {}
